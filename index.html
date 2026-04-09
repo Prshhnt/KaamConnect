@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" class="page-enter">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DailyWork Connect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">🔧 <span data-i18n="common.brand">DailyWork</span></a>
+      <button class="search-pill mobile-only touch-target" data-search-expand>
+        <i class="ph ph-magnifying-glass"></i>
+        <span data-i18n="common.searchPlaceholder">Search workers near you...</span>
+      </button>
+      <div class="search-pill desktop-only">
+        <i class="ph ph-magnifying-glass"></i>
+        <span data-i18n="common.searchPlaceholder">Search workers near you...</span>
+      </div>
+      <button class="lang-btn touch-target" data-language-switcher>
+        🌐 <span class="lang-label" data-lang-label>English</span>
+      </button>
+      <a href="login.html" class="login-btn touch-target"><i class="ph ph-sign-in"></i><span data-i18n="common.login">Login</span></a>
+      <button class="icon-btn touch-target" data-menu-toggle><i class="ph ph-list"></i></button>
+    </div>
+  </header>
+
+  <div class="search-overlay" data-search-overlay>
+    <button class="icon-btn" data-search-close><i class="ph ph-x"></i></button>
+    <div class="search-pill">
+      <i class="ph ph-magnifying-glass"></i>
+      <span data-i18n="common.searchPlaceholder">Search workers near you...</span>
+    </div>
+  </div>
+
+  <div class="drawer-backdrop" data-drawer-backdrop></div>
+  <aside class="drawer" data-drawer>
+    <button class="icon-btn" data-drawer-close><i class="ph ph-x"></i></button>
+    <nav class="drawer-menu">
+      <a class="drawer-link" href="index.html">🏠 Home</a>
+      <a class="drawer-link" href="search.html">🔍 Search</a>
+      <a class="drawer-link" href="register.html">📝 Register</a>
+      <a class="drawer-link" href="login.html">🔐 Login</a>
+    </nav>
+  </aside>
+
+  <div class="language-hint" data-language-hint>Switch language? 🌐 Tap here</div>
+  <div class="connection-hint" data-connection-hint>Slow network detected. Using lighter experience.</div>
+
+  <main>
+    <section class="section">
+      <div class="container hero">
+        <div class="hero-grid">
+          <div>
+            <h1 class="hero-title" data-i18n="index.heroTitle">Find Trusted Workers Near You</h1>
+            <p class="hero-subtitle" data-i18n="index.heroSubtitle">Electricians · Plumbers · Maids · And More</p>
+            <div style="margin-top:16px" class="search-input-lg">
+              <input type="text" data-i18n-placeholder="index.heroInput" placeholder="Enter your city or area..." id="heroCityInput">
+              <button aria-label="Search" id="heroSearchBtn"><i class="ph ph-magnifying-glass"></i></button>
+            </div>
+            <button id="heroLocationBtn" class="btn btn-outline touch-target" style="margin-top:12px">📍 <span data-i18n="common.useLocation">Use My Location</span></button>
+          </div>
+          <div class="hero-illustration">
+            <svg viewBox="0 0 400 300" role="img" aria-label="Worker illustration">
+              <defs>
+                <linearGradient id="shirt" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#F97316"/>
+                  <stop offset="100%" stop-color="#FDBA74"/>
+                </linearGradient>
+              </defs>
+              <rect x="120" y="80" width="160" height="180" rx="40" fill="#FFE7D0"/>
+              <circle cx="200" cy="90" r="42" fill="#F5CBA7"/>
+              <rect x="145" y="135" width="110" height="100" rx="24" fill="url(#shirt)"/>
+              <rect x="170" y="150" width="16" height="72" rx="8" fill="#7C2D12"/>
+              <rect x="212" y="150" width="16" height="72" rx="8" fill="#7C2D12"/>
+              <circle cx="152" cy="180" r="18" fill="#F5CBA7"/>
+              <rect x="136" y="186" width="50" height="14" rx="7" fill="#6B7280"/>
+              <rect x="220" y="176" width="62" height="18" rx="8" fill="#334155"/>
+              <rect x="255" y="164" width="8" height="42" rx="4" fill="#94A3B8"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="category-grid" id="categoryGrid"></div>
+      </div>
+    </section>
+
+    <section class="trust-strip">
+      <div class="container trust-grid">
+        <div><p class="trust-number"><span data-counter="500">0</span>+</p><p>👷 Workers</p></div>
+        <div><p class="trust-number"><span data-counter="200">0</span>+</p><p>🏢 Employers</p></div>
+        <div><p class="trust-number"><span data-counter="20">0</span>+</p><p>🏙️ Cities</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container card">
+        <div class="tab-toggle" id="howToggle">
+          <button class="active touch-target" data-target="worker">For Workers</button>
+          <button class="touch-target" data-target="employer">For Employers</button>
+        </div>
+        <div class="steps" id="stepsPanel" style="margin-top:16px"></div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <h2 data-i18n="index.featuredTitle">Top Rated Workers Near You</h2>
+        <div id="featuredWorkers" class="worker-carousel" style="margin-top:14px"></div>
+        <div id="featuredDots" class="carousel-dots"></div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container split-cta">
+        <article class="card">
+          <h3 data-i18n="index.ctaWorker">Are you a worker?</h3>
+          <p data-i18n="index.ctaWorkerSub">Register free and start earning</p>
+          <a class="btn btn-primary touch-target" href="register.html" style="margin-top:12px">👷 Join as Worker</a>
+        </article>
+        <article class="card">
+          <h3 data-i18n="index.ctaEmployer">Need workers?</h3>
+          <p data-i18n="index.ctaEmployerSub">Post a job in 2 minutes — Free!</p>
+          <a class="btn btn-primary touch-target" href="register.html?role=employer" style="margin-top:12px">🏢 Post a Job</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initCommonUI, categoryMeta, renderWorkerCard, renderSkeletonCards, requestCityFromLocation, showToast } from "./main.js";
+
+    const categoryGrid = document.getElementById("categoryGrid");
+    const featuredWorkers = document.getElementById("featuredWorkers");
+    const featuredDots = document.getElementById("featuredDots");
+
+    const categories = Object.entries(categoryMeta);
+    categories.forEach(([key, meta]) => {
+      const node = document.createElement("a");
+      node.href = `search.html?category=${key}`;
+      node.className = "category-card touch-target";
+      node.style.background = meta.color;
+      node.innerHTML = `<span class="emoji">${meta.emoji}</span><span>${meta.label}</span>`;
+      categoryGrid.appendChild(node);
+    });
+
+    const stepsData = {
+      worker: [
+        { title: "Register Free", text: "Create your profile in a few easy steps." },
+        { title: "Set Your Rate", text: "Pick a fair daily wage and availability." },
+        { title: "Get Hired", text: "Receive nearby job requests directly." }
+      ],
+      employer: [
+        { title: "Post a Job", text: "Tell what work you need and your area." },
+        { title: "Browse Workers", text: "See ratings, rates, and experience quickly." },
+        { title: "Hire Directly", text: "Accept and call the worker instantly." }
+      ]
+    };
+
+    function renderSteps(mode = "worker") {
+      const panel = document.getElementById("stepsPanel");
+      panel.innerHTML = stepsData[mode]
+        .map((item, index) => `<article class="step-card card"><span class="step-no">${index + 1}</span><h3>${item.title}</h3><p>${item.text}</p></article>`)
+        .join("");
+    }
+
+    document.getElementById("howToggle").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-target]");
+      if (!button) {
+        return;
+      }
+      document.querySelectorAll("#howToggle button").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      renderSteps(button.dataset.target);
+    });
+
+    renderSteps("worker");
+
+    const mockWorkers = [
+      { id: "w1", name: "Ramesh", category: "electrician", rating: 4.9, reviews: 47, rate: 600, experience: 8, distance: 2.3, city: "Delhi", available: true, phone: "9876543210" },
+      { id: "w2", name: "Sunita", category: "maid", rating: 4.8, reviews: 35, rate: 400, experience: 6, distance: 3.1, city: "Mumbai", available: true, phone: "9876500000" },
+      { id: "w3", name: "Raju", category: "plumber", rating: 4.7, reviews: 29, rate: 700, experience: 9, distance: 1.4, city: "Pune", available: false, phone: "9876511111" }
+    ];
+
+    renderSkeletonCards(featuredWorkers, 3);
+    setTimeout(() => {
+      featuredWorkers.innerHTML = mockWorkers.map(renderWorkerCard).join("");
+      featuredDots.innerHTML = mockWorkers.map((_, idx) => `<span class="carousel-dot ${idx === 0 ? "active" : ""}"></span>`).join("");
+    }, 500);
+
+    featuredWorkers.addEventListener("scroll", () => {
+      const cardWidth = featuredWorkers.firstElementChild?.getBoundingClientRect().width || 1;
+      const index = Math.round(featuredWorkers.scrollLeft / (cardWidth + 14));
+      [...featuredDots.children].forEach((dot, idx) => dot.classList.toggle("active", idx === index));
+    });
+
+    document.getElementById("heroLocationBtn").addEventListener("click", async () => {
+      const city = await requestCityFromLocation();
+      if (!city) {
+        showToast("Could not get your location. Please enter city.", "warning");
+        return;
+      }
+      document.getElementById("heroCityInput").value = city;
+      showToast(`Location found: ${city}`, "success");
+    });
+
+    document.getElementById("heroSearchBtn").addEventListener("click", () => {
+      const city = document.getElementById("heroCityInput").value.trim();
+      const query = city ? `?city=${encodeURIComponent(city)}` : "";
+      window.location.href = `search.html${query}`;
+    });
+
+    initCommonUI();
+  </script>
+</body>
+</html>

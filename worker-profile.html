@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" class="page-enter">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker Profile - DailyWork</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="container section">
+    <div class="top-bar">
+      <button class="btn btn-outline touch-target" onclick="history.back()">← Back</button>
+      <div></div>
+      <button class="btn btn-outline touch-target" id="shareBtn">Share 🔗</button>
+    </div>
+
+    <section class="card profile-hero">
+      <img class="profile-avatar" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=220&q=60" alt="Ramesh Kumar">
+      <h1>Ramesh Kumar</h1>
+      <p>⚡ Electrician</p>
+      <p>📍 Lajpat Nagar, DL</p>
+      <p style="color:var(--success)">🟢 Available Now</p>
+      <p>⭐⭐⭐⭐⭐ 4.9 (47 reviews)</p>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <p>💰 ₹600 per day</p>
+      <p>🏆 8 years experience</p>
+      <p>🗣 Hindi, English</p>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <h2>About</h2>
+      <p style="margin-top:8px">Expert in home wiring, AC repair, switchboard fitting. Reliable and on time.</p>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <h2>Skills</h2>
+      <div class="skill-wrap" style="margin-top:8px">
+        <span class="skill-tag">Home Wiring</span>
+        <span class="skill-tag">AC Repair</span>
+        <span class="skill-tag">Switchboard</span>
+        <span class="skill-tag">Solar Panel</span>
+        <span class="skill-tag">Ceiling Fan</span>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <h2>Reviews (47)</h2>
+      <article class="card" style="margin-top:8px">
+        <p>⭐⭐⭐⭐⭐ Sharma Family · 2 days ago</p>
+        <p>Very good work and on time.</p>
+      </article>
+      <article class="card" style="margin-top:8px">
+        <p>⭐⭐⭐⭐⭐ Gupta Home · 4 days ago</p>
+        <p>Clean work and friendly behavior.</p>
+      </article>
+    </section>
+
+    <div class="sticky-action">
+      <button class="btn btn-primary touch-target" id="hireBtn" style="width:100%">🤝 Hire Ramesh Kumar</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initCommonUI, showToast, showSuccessOverlay } from "./main.js";
+
+    document.getElementById("shareBtn").addEventListener("click", async () => {
+      const url = window.location.href;
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast("Copied!", "success");
+      } catch {
+        showToast("Could not copy link", "error");
+      }
+    });
+
+    document.getElementById("hireBtn").addEventListener("click", () => {
+      showSuccessOverlay("✅ Request Sent!");
+      showToast("Worker will contact you soon.", "success");
+    });
+
+    initCommonUI();
+  </script>
+</body>
+</html>

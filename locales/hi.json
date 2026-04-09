@@ -1,0 +1,47 @@
+{
+  "common": {
+    "brand": "DailyWork",
+    "searchPlaceholder": "अपने पास के कामगार खोजें...",
+    "login": "लॉगिन",
+    "register": "रजिस्टर",
+    "worker": "कामगार",
+    "employer": "नियोक्ता",
+    "cityPlaceholder": "अपना शहर लिखें",
+    "loading": "लोड हो रहा है...",
+    "retry": "फिर से कोशिश करें",
+    "useLocation": "मेरी लोकेशन इस्तेमाल करें"
+  },
+  "index": {
+    "heroTitle": "अपने पास भरोसेमंद कामगार ढूंढें",
+    "heroSubtitle": "इलेक्ट्रीशियन · प्लंबर · मेड · और भी",
+    "heroInput": "अपना शहर या इलाका लिखें...",
+    "featuredTitle": "आपके पास के टॉप रेटेड कामगार",
+    "ctaWorker": "क्या आप कामगार हैं?",
+    "ctaWorkerSub": "फ्री रजिस्टर करें और कमाई शुरू करें",
+    "ctaEmployer": "कामगार चाहिए?",
+    "ctaEmployerSub": "2 मिनट में जॉब पोस्ट करें — मुफ्त"
+  },
+  "login": {
+    "title": "वापसी पर स्वागत है!",
+    "phone": "फोन नंबर",
+    "password": "पासवर्ड",
+    "button": "लॉगिन",
+    "show": "दिखाएं",
+    "hide": "छुपाएं",
+    "registerCta": "अकाउंट नहीं है? रजिस्टर करें"
+  },
+  "register": {
+    "step1Title": "आप कौन हैं?",
+    "step2Title": "अपने बारे में बताएं",
+    "step3Title": "अपनी फोटो जोड़ें (वैकल्पिक)",
+    "workerCard": "मैं कामगार हूं",
+    "employerCard": "मुझे कामगार चाहिए"
+  },
+  "search": {
+    "input": "कामगार खोजें...",
+    "filter": "फिल्टर",
+    "findWorkers": "कामगार खोजें",
+    "findJobs": "जॉब खोजें",
+    "locationBanner": "पास के बेहतर रिजल्ट के लिए लोकेशन दें"
+  }
+}

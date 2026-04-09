@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" class="page-enter">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker Dashboard - DailyWork</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="container section">
+    <h1>Good morning, Ramesh! 👋</h1>
+
+    <section class="card" style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div>
+          <h3>You are currently: <span id="availabilityText" style="color:var(--success)">🟢 AVAILABLE</span></h3>
+          <p>Toggle to go Busy</p>
+        </div>
+        <button class="toggle touch-target active" id="availabilityToggle"></button>
+      </div>
+    </section>
+
+    <section class="stats-grid" style="margin-top:12px">
+      <article class="card stat-card"><p class="stat-value">3</p><p>Active Apps</p></article>
+      <article class="card stat-card"><p class="stat-value">12</p><p>Total Jobs</p></article>
+      <article class="card stat-card"><p class="stat-value">⭐ 4.8</p><p>Rating</p></article>
+    </section>
+
+    <section style="margin-top:14px">
+      <h2>📋 New Jobs Matching You</h2>
+      <div id="matchJobs" class="dashboard-grid" style="margin-top:10px"></div>
+    </section>
+
+    <section style="margin-top:16px">
+      <h2>Applied Jobs</h2>
+      <div id="appliedJobs" class="dashboard-grid" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Profile</h2>
+      <div style="margin-top:8px;background:#EEE;border-radius:9999px;height:10px;overflow:hidden"><div style="height:100%;width:75%;background:var(--primary)"></div></div>
+      <p style="margin-top:6px">Profile 75% Complete. Add photo to complete.</p>
+      <div style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin-top:12px">
+        <img class="preview-photo" style="display:block" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=60" alt="Ramesh">
+        <div>
+          <h3>Ramesh Kumar</h3>
+          <p>⚡ Electrician · Delhi</p>
+          <p>⭐ 4.9 · 47 reviews</p>
+        </div>
+        <a href="register.html" class="btn btn-outline touch-target">✏️ Edit</a>
+      </div>
+      <div style="margin-top:10px">
+        <p>My Work: ⚡ Electrician</p>
+        <p>Daily Rate: ₹600/day</p>
+        <p>Experience: 8 years</p>
+        <p>City: Delhi</p>
+        <p>Phone: 98765XXXXX</p>
+      </div>
+    </section>
+
+    <div class="spacer-bottom-nav"></div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="worker-dashboard.html" class="bottom-tab active"><i class="ph-fill ph-house"></i><span>Home</span></a>
+    <a href="search.html" class="bottom-tab"><i class="ph ph-magnifying-glass"></i><span>Search</span></a>
+    <a href="worker-dashboard.html" class="bottom-tab"><i class="ph ph-briefcase"></i><span>Jobs</span></a>
+    <a href="worker-profile.html" class="bottom-tab"><i class="ph ph-user"></i><span>Profile</span></a>
+  </nav>
+
+  <script type="module">
+    import { initCommonUI, renderJobCard, showToast, setupPullToRefresh } from "./main.js";
+
+    const matches = [
+      { id: "m1", title: "Electrician needed", location: "Lajpat Nagar", rate: 700, duration: "1 week", status: "open", createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+      { id: "m2", title: "Switchboard repair", location: "South Ex", rate: 650, duration: "2 days", status: "open", createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() }
+    ];
+
+    const applied = [
+      { id: "a1", title: "Electrician — Sharma House", location: "Lajpat Nagar", rate: 700, duration: "1 week", status: "pending", createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+      { id: "a2", title: "Plumbing Work — Mehta Home", location: "Connaught Place", rate: 500, duration: "2 days", status: "accepted", createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() }
+    ];
+
+    document.getElementById("matchJobs").innerHTML = matches.map(renderJobCard).join("");
+    document.getElementById("appliedJobs").innerHTML = applied.map((job) => {
+      const call = job.status === "accepted" ? `<a class="btn btn-primary touch-target" href="tel:9876543210" style="margin-top:10px">📞 Call Employer: 9876XXXXXX</a>` : "";
+      return `<article class="card"><span class="badge ${job.status}">${job.status.toUpperCase()}</span><h3 style="margin-top:6px">${job.title}</h3><p>${job.location} · ₹${job.rate}/day</p><p>Applied 2 days ago</p>${call}</article>`;
+    }).join("");
+
+    const toggle = document.getElementById("availabilityToggle");
+    const text = document.getElementById("availabilityText");
+    toggle.addEventListener("click", () => {
+      const active = toggle.classList.toggle("active");
+      text.textContent = active ? "🟢 AVAILABLE" : "🔴 BUSY";
+      text.style.color = active ? "var(--success)" : "var(--danger)";
+      showToast(active ? "You are now available" : "You are now busy", "success");
+    });
+
+    setupPullToRefresh(() => {
+      showToast("Refreshing jobs...", "success");
+      window.location.reload();
+    });
+
+    initCommonUI();
+  </script>
+</body>
+</html>

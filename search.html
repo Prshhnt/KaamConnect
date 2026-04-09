@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" class="page-enter">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search - DailyWork</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="container section">
+    <div class="top-bar">
+      <button class="btn btn-outline touch-target" onclick="history.back()">← Back</button>
+      <div class="search-pill"><i class="ph ph-magnifying-glass"></i><span data-i18n="search.input">Search workers...</span></div>
+      <button class="btn btn-outline touch-target" id="filterBtn">Filter</button>
+    </div>
+
+    <div class="tab-toggle" id="modeToggle">
+      <button class="active touch-target" data-mode="workers">Find Workers ✓</button>
+      <button class="touch-target" data-mode="jobs">Find Jobs</button>
+    </div>
+
+    <section class="card" id="locationBanner" style="margin-top:12px;background:var(--warning-light)">
+      <h3>📍 Allow location for better results nearby</h3>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-primary touch-target" id="allowLocationBtn">Allow Location Access</button>
+        <button class="btn btn-outline touch-target" id="enterCityBtn">Enter City →</button>
+      </div>
+    </section>
+
+    <section id="results" class="dashboard-grid" style="margin-top:14px"></section>
+  </main>
+
+  <div class="sheet" id="filterSheet">
+    <div class="sheet-backdrop"></div>
+    <div class="sheet-panel">
+      <div class="drag-handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3>Filter Workers</h3>
+        <button class="icon-btn touch-target" id="closeFilterBtn"><i class="ph ph-x"></i></button>
+      </div>
+
+      <div class="range-wrap" style="margin-top:10px">
+        <label>📍 Distance: <span id="distanceValue">10</span> km</label>
+        <input type="range" id="distanceRange" min="1" max="50" value="10" class="touch-target">
+      </div>
+
+      <div style="margin-top:14px">
+        <label>💼 Category</label>
+        <div class="filter-chips" id="categoryChips"></div>
+      </div>
+
+      <div class="range-wrap" style="margin-top:14px">
+        <label>💰 Daily Rate: ₹<span id="rateMin">200</span> - ₹<span id="rateMax">2000</span></label>
+        <input type="range" id="rateMinInput" min="100" max="2500" value="200" step="50" class="touch-target">
+        <input type="range" id="rateMaxInput" min="100" max="2500" value="2000" step="50" class="touch-target">
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+        <label>✅ Available Only</label>
+        <button id="availableToggle" class="toggle touch-target active"></button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+        <label>⭐ Min Rating</label>
+        <select id="ratingInput" class="input" style="min-height:52px;max-width:150px">
+          <option value="0">Any</option>
+          <option value="3">3+</option>
+          <option value="4" selected>4+</option>
+          <option value="4.5">4.5+</option>
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:16px">
+        <button class="btn btn-outline touch-target" id="clearFiltersBtn">Clear All</button>
+        <button class="btn btn-primary touch-target" id="applyFiltersBtn">Show 0 Results</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initCommonUI, categoryMeta, renderWorkerCard, renderJobCard, renderSkeletonCards, showEmptyState, showToast, initBottomSheet, requestCityFromLocation, showSuccessOverlay } from "./main.js";
+
+    const resultsNode = document.getElementById("results");
+    const locationBanner = document.getElementById("locationBanner");
+    const categoryChips = document.getElementById("categoryChips");
+    const applyFiltersBtn = document.getElementById("applyFiltersBtn");
+
+    const state = {
+      mode: "workers",
+      selectedCategory: new URLSearchParams(location.search).get("category") || "",
+      distance: 10,
+      rateMin: 200,
+      rateMax: 2000,
+      availableOnly: true,
+      minRating: 4,
+      city: new URLSearchParams(location.search).get("city") || ""
+    };
+
+    const workers = [
+      { id: "w1", name: "Ramesh Kumar", category: "electrician", rating: 4.9, reviews: 47, rate: 600, experience: 8, distance: 2.3, city: "Lajpat Nagar", available: true, phone: "9876543210" },
+      { id: "w2", name: "Sunita Devi", category: "maid", rating: 4.8, reviews: 34, rate: 400, experience: 6, distance: 4.2, city: "Karol Bagh", available: true, phone: "9876543201" },
+      { id: "w3", name: "Raju Yadav", category: "plumber", rating: 4.1, reviews: 19, rate: 700, experience: 9, distance: 6.1, city: "Saket", available: false, phone: "9876543202" },
+      { id: "w4", name: "Amit Sharma", category: "carpenter", rating: 4.6, reviews: 26, rate: 900, experience: 10, distance: 8.8, city: "Rohini", available: true, phone: "9876543203" }
+    ];
+
+    const jobs = [
+      { id: "j1", title: "Electrician Needed", location: "Lajpat Nagar", rate: 700, duration: "1 week", status: "open", createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+      { id: "j2", title: "House Cleaning Work", location: "Dwarka", rate: 500, duration: "2-3 days", status: "pending", createdAt: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString() }
+    ];
+
+    function buildCategoryChips() {
+      categoryChips.innerHTML = Object.entries(categoryMeta).map(([key, value]) => {
+        const activeClass = state.selectedCategory === key ? "active" : "";
+        return `<button class="chip touch-target ${activeClass}" data-chip="${key}">${value.emoji} ${value.label}</button>`;
+      }).join("");
+    }
+
+    function filteredWorkers() {
+      return workers.filter((worker) => {
+        if (state.selectedCategory && worker.category !== state.selectedCategory) {
+          return false;
+        }
+        if (worker.distance > state.distance) {
+          return false;
+        }
+        if (worker.rate < state.rateMin || worker.rate > state.rateMax) {
+          return false;
+        }
+        if (state.availableOnly && !worker.available) {
+          return false;
+        }
+        if (worker.rating < state.minRating) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    function renderResults() {
+      renderSkeletonCards(resultsNode, 3);
+      setTimeout(() => {
+        if (state.mode === "workers") {
+          const data = filteredWorkers();
+          applyFiltersBtn.textContent = `Show ${data.length} Results`;
+          if (!data.length) {
+            showEmptyState({
+              container: resultsNode,
+              emoji: "😔",
+              title: "No workers found nearby",
+              message: "Try expanding your search radius",
+              buttonText: "🔍 Expand Search",
+              onAction: () => {
+                state.distance = Math.min(50, state.distance + 10);
+                document.getElementById("distanceRange").value = String(state.distance);
+                document.getElementById("distanceValue").textContent = String(state.distance);
+                renderResults();
+              }
+            });
+            return;
+          }
+          resultsNode.innerHTML = data.map(renderWorkerCard).join("");
+        } else {
+          applyFiltersBtn.textContent = `Show ${jobs.length} Results`;
+          resultsNode.innerHTML = jobs.map(renderJobCard).join("");
+          resultsNode.querySelectorAll("[data-job-apply]").forEach((button) => {
+            button.addEventListener("click", () => {
+              showSuccessOverlay("✅ Applied Successfully!");
+              showToast("Application sent to employer", "success");
+            });
+          });
+        }
+      }, 420);
+    }
+
+    buildCategoryChips();
+    renderResults();
+
+    categoryChips.addEventListener("click", (event) => {
+      const chip = event.target.closest("[data-chip]");
+      if (!chip) {
+        return;
+      }
+      state.selectedCategory = chip.dataset.chip;
+      buildCategoryChips();
+      renderResults();
+    });
+
+    document.getElementById("modeToggle").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-mode]");
+      if (!button) {
+        return;
+      }
+      document.querySelectorAll("#modeToggle button").forEach((node) => node.classList.remove("active"));
+      button.classList.add("active");
+      state.mode = button.dataset.mode;
+      renderResults();
+    });
+
+    document.getElementById("distanceRange").addEventListener("input", (event) => {
+      state.distance = Number(event.target.value);
+      document.getElementById("distanceValue").textContent = event.target.value;
+      renderResults();
+    });
+
+    document.getElementById("rateMinInput").addEventListener("input", (event) => {
+      state.rateMin = Number(event.target.value);
+      if (state.rateMin > state.rateMax) {
+        state.rateMax = state.rateMin;
+        document.getElementById("rateMaxInput").value = String(state.rateMax);
+      }
+      document.getElementById("rateMin").textContent = String(state.rateMin);
+      document.getElementById("rateMax").textContent = String(state.rateMax);
+      renderResults();
+    });
+
+    document.getElementById("rateMaxInput").addEventListener("input", (event) => {
+      state.rateMax = Number(event.target.value);
+      if (state.rateMax < state.rateMin) {
+        state.rateMin = state.rateMax;
+        document.getElementById("rateMinInput").value = String(state.rateMin);
+      }
+      document.getElementById("rateMin").textContent = String(state.rateMin);
+      document.getElementById("rateMax").textContent = String(state.rateMax);
+      renderResults();
+    });
+
+    document.getElementById("availableToggle").addEventListener("click", (event) => {
+      state.availableOnly = !state.availableOnly;
+      event.currentTarget.classList.toggle("active", state.availableOnly);
+      renderResults();
+    });
+
+    document.getElementById("ratingInput").addEventListener("change", (event) => {
+      state.minRating = Number(event.target.value);
+      renderResults();
+    });
+
+    document.getElementById("clearFiltersBtn").addEventListener("click", () => {
+      state.selectedCategory = "";
+      state.distance = 10;
+      state.rateMin = 200;
+      state.rateMax = 2000;
+      state.availableOnly = true;
+      state.minRating = 4;
+      document.getElementById("distanceRange").value = "10";
+      document.getElementById("rateMinInput").value = "200";
+      document.getElementById("rateMaxInput").value = "2000";
+      document.getElementById("ratingInput").value = "4";
+      document.getElementById("availableToggle").classList.add("active");
+      document.getElementById("distanceValue").textContent = "10";
+      document.getElementById("rateMin").textContent = "200";
+      document.getElementById("rateMax").textContent = "2000";
+      buildCategoryChips();
+      renderResults();
+    });
+
+    document.getElementById("allowLocationBtn").addEventListener("click", async () => {
+      const city = await requestCityFromLocation();
+      if (city) {
+        state.city = city;
+        locationBanner.remove();
+        showToast(`Searching near ${city}`, "success");
+      } else {
+        showToast("You seem to be offline. Check your connection.", "error");
+      }
+    });
+
+    document.getElementById("enterCityBtn").addEventListener("click", () => {
+      const city = prompt("Enter your city");
+      if (!city) {
+        return;
+      }
+      state.city = city;
+      locationBanner.remove();
+      showToast(`Searching near ${city}`, "success");
+    });
+
+    initBottomSheet("#filterBtn", "#filterSheet", "#closeFilterBtn");
+    initCommonUI();
+  </script>
+</body>
+</html>

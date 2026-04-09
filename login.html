@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" class="page-enter">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - DailyWork</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-card">
+      <h1 class="auth-logo">🔧 DailyWork</h1>
+      <h2 class="auth-title" data-i18n="login.title">Welcome Back! 👋</h2>
+
+      <div class="tab-toggle" id="roleToggle">
+        <button class="active touch-target" data-role="worker">👷 Worker</button>
+        <button class="touch-target" data-role="employer">🏢 Employer</button>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="phoneInput" data-i18n="login.phone">Phone Number</label>
+        <div class="input-row">
+          <span class="input-icon">📱</span>
+          <input class="input" id="phoneInput" name="tel" autocomplete="tel" inputmode="numeric" maxlength="10" placeholder="9876543210">
+        </div>
+        <p class="field-error" id="phoneError"></p>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="passwordInput" data-i18n="login.password">Password</label>
+        <div class="input-row">
+          <span class="input-icon">🔒</span>
+          <input class="input" id="passwordInput" name="current-password" autocomplete="current-password" type="password" placeholder="••••••••">
+          <button type="button" class="input-action" id="showPasswordBtn" data-i18n="login.show">Show</button>
+        </div>
+        <p class="field-error" id="passwordError"></p>
+      </div>
+
+      <button class="btn btn-primary touch-target" id="loginBtn">🚀 <span data-i18n="login.button">Login</span></button>
+      <a href="register.html" style="text-align:center;font-weight:600;color:var(--secondary)">Don't have an account? Register →</a>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initCommonUI, showToast, showLoading, hideLoading } from "./main.js";
+    import { loginWithPhonePassword } from "./auth.js";
+
+    const roleToggle = document.getElementById("roleToggle");
+    const phoneInput = document.getElementById("phoneInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const loginBtn = document.getElementById("loginBtn");
+    const phoneError = document.getElementById("phoneError");
+    const passwordError = document.getElementById("passwordError");
+    const showPasswordBtn = document.getElementById("showPasswordBtn");
+
+    let selectedRole = "worker";
+
+    function setError(node, message) {
+      node.textContent = message || "";
+      node.classList.toggle("visible", Boolean(message));
+    }
+
+    roleToggle.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-role]");
+      if (!button) {
+        return;
+      }
+      roleToggle.querySelectorAll("button").forEach((node) => node.classList.remove("active"));
+      button.classList.add("active");
+      selectedRole = button.dataset.role;
+    });
+
+    showPasswordBtn.addEventListener("click", () => {
+      const visible = passwordInput.type === "text";
+      passwordInput.type = visible ? "password" : "text";
+      showPasswordBtn.textContent = visible ? "Show" : "Hide";
+    });
+
+    loginBtn.addEventListener("click", async () => {
+      setError(phoneError, "");
+      setError(passwordError, "");
+
+      showLoading("Signing you in...");
+      const result = await loginWithPhonePassword(phoneInput.value.trim(), passwordInput.value);
+      hideLoading();
+
+      if (!result.ok) {
+        setError(phoneError, result.errors.phone);
+        setError(passwordError, result.errors.password);
+        if (!result.errors.phone && !result.errors.password) {
+          showToast("Something went wrong. Please try again.", "error");
+        }
+        return;
+      }
+
+      showToast("Login successful", "success");
+      window.location.href = selectedRole === "worker" ? "worker-dashboard.html" : "employer-dashboard.html";
+    });
+
+    initCommonUI();
+  </script>
+</body>
+</html>

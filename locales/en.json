@@ -1,0 +1,47 @@
+{
+  "common": {
+    "brand": "DailyWork",
+    "searchPlaceholder": "Search workers near you...",
+    "login": "Login",
+    "register": "Register",
+    "worker": "Worker",
+    "employer": "Employer",
+    "cityPlaceholder": "Enter your city",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "useLocation": "Use My Location"
+  },
+  "index": {
+    "heroTitle": "Find Trusted Workers Near You",
+    "heroSubtitle": "Electricians · Plumbers · Maids · And More",
+    "heroInput": "Enter your city or area...",
+    "featuredTitle": "Top Rated Workers Near You",
+    "ctaWorker": "Are you a worker?",
+    "ctaWorkerSub": "Register free and start earning",
+    "ctaEmployer": "Need workers?",
+    "ctaEmployerSub": "Post a job in 2 minutes — Free!"
+  },
+  "login": {
+    "title": "Welcome Back!",
+    "phone": "Phone Number",
+    "password": "Password",
+    "button": "Login",
+    "show": "Show",
+    "hide": "Hide",
+    "registerCta": "Don\"t have an account? Register"
+  },
+  "register": {
+    "step1Title": "Who are you?",
+    "step2Title": "Tell us about yourself",
+    "step3Title": "Add Your Photo (Optional)",
+    "workerCard": "I am a Worker",
+    "employerCard": "I need to Hire"
+  },
+  "search": {
+    "input": "Search workers...",
+    "filter": "Filter",
+    "findWorkers": "Find Workers",
+    "findJobs": "Find Jobs",
+    "locationBanner": "Allow location for better nearby results"
+  }
+}

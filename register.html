@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" class="page-enter">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - DailyWork</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-card" style="width:min(720px,100%)">
+      <h1 class="auth-logo">🔧 DailyWork</h1>
+      <div class="progress-wrap">
+        <div class="progress-line"><div class="progress-fill" id="progressFill"></div></div>
+        <small id="stepText">Step 1 of 3</small>
+      </div>
+
+      <section id="step1" class="role-cards">
+        <h2 data-i18n="register.step1Title">Who are you?</h2>
+        <button class="role-card touch-target" data-role-card="worker">
+          <div>
+            <div style="font-size:38px">👷</div>
+            <h3>I am a Worker</h3>
+            <p>Electrician, Plumber, Maid...</p>
+          </div>
+        </button>
+        <button class="role-card touch-target" data-role-card="employer">
+          <div>
+            <div style="font-size:38px">🏢</div>
+            <h3>I need to Hire</h3>
+            <p>Find workers for my home/work</p>
+          </div>
+        </button>
+        <button id="step1Next" class="btn btn-primary touch-target">Continue</button>
+      </section>
+
+      <section id="step2" style="display:none">
+        <h2 data-i18n="register.step2Title">Tell us about yourself</h2>
+        <div class="dashboard-grid" style="margin-top:12px">
+          <div class="input-group">
+            <label class="input-label">Name</label>
+            <input class="input" id="nameInput" autocomplete="name" placeholder="Your full name">
+            <p class="field-error" id="nameError"></p>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Phone Number</label>
+            <div class="input-row">
+              <span class="input-icon">+91</span>
+              <input class="input" id="phoneInput" autocomplete="tel" name="tel" inputmode="numeric" maxlength="10" placeholder="9876543210" style="padding-left:54px">
+            </div>
+            <p class="field-error" id="phoneError"></p>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Password</label>
+            <input class="input" id="passwordInput" type="password" autocomplete="new-password" name="new-password" placeholder="At least 6 characters">
+            <p class="field-error" id="passwordError"></p>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">City</label>
+            <input class="input" id="cityInput" placeholder="Your city" autocomplete="address-level2">
+            <p class="field-error" id="cityError"></p>
+            <button id="detectLocationBtn" type="button" class="btn btn-primary touch-target">📍 Detect My Location</button>
+          </div>
+
+          <div id="workerOnlyFields" style="display:none;gap:12px;display:none">
+            <div>
+              <label class="input-label">What is your work?</label>
+              <div class="category-grid" id="workTypeGrid"></div>
+              <p class="field-error" id="workTypeError"></p>
+            </div>
+            <div class="input-group">
+              <label class="input-label">Daily Rate</label>
+              <input type="range" min="200" max="2500" step="50" value="500" id="rateSlider" class="touch-target">
+              <input class="input" id="rateInput" inputmode="numeric" value="500">
+              <small id="ratePreview">₹500 per day</small>
+              <p class="field-error" id="dailyRateError"></p>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-outline touch-target" id="step2Back">Back</button>
+          <button class="btn btn-primary touch-target" id="step2Next">Continue</button>
+        </div>
+      </section>
+
+      <section id="step3" style="display:none">
+        <h2 data-i18n="register.step3Title">Add Your Photo (Optional)</h2>
+        <div class="photo-upload">
+          <div>
+            <div style="font-size:36px">📷</div>
+            <p>Tap to take photo or choose from gallery</p>
+            <img id="photoPreview" class="preview-photo" style="display:none;margin:10px auto 0" alt="Preview">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+          <label class="btn btn-outline touch-target" for="cameraInput">📷 Take Photo</label>
+          <label class="btn btn-outline touch-target" for="galleryInput">🖼 Gallery</label>
+        </div>
+        <input id="cameraInput" type="file" accept="image/*" capture="user" style="display:none">
+        <input id="galleryInput" type="file" accept="image/*" style="display:none">
+
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-outline touch-target" id="step3Back">Back</button>
+          <button class="btn btn-muted touch-target" id="skipBtn">Skip for now</button>
+          <button class="btn btn-primary touch-target" id="createAccountBtn">Create Account</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initCommonUI, categoryMeta, requestCityFromLocation, showToast, showLoading, hideLoading, showSuccessOverlay, formatCurrency } from "./main.js";
+    import { registerUser } from "./auth.js";
+
+    const steps = [document.getElementById("step1"), document.getElementById("step2"), document.getElementById("step3")];
+    const progressFill = document.getElementById("progressFill");
+    const stepText = document.getElementById("stepText");
+    const workerOnlyFields = document.getElementById("workerOnlyFields");
+    const workTypeGrid = document.getElementById("workTypeGrid");
+    let currentStep = 1;
+    let selectedRole = "";
+    let selectedWorkType = "";
+    let selectedPhotoFile = null;
+
+    function goToStep(step) {
+      currentStep = step;
+      steps.forEach((node, index) => {
+        node.style.display = index + 1 === step ? "block" : "none";
+      });
+      progressFill.style.width = `${step * 33.333}%`;
+      stepText.textContent = `Step ${step} of 3`;
+    }
+
+    function setError(id, message) {
+      const node = document.getElementById(id);
+      node.textContent = message || "";
+      node.classList.toggle("visible", Boolean(message));
+    }
+
+    function clearErrors() {
+      ["nameError", "phoneError", "passwordError", "cityError", "workTypeError", "dailyRateError"].forEach((id) => setError(id, ""));
+    }
+
+    document.querySelectorAll("[data-role-card]").forEach((card) => {
+      card.addEventListener("click", () => {
+        document.querySelectorAll("[data-role-card]").forEach((node) => node.classList.remove("active"));
+        card.classList.add("active");
+        selectedRole = card.dataset.roleCard;
+      });
+    });
+
+    document.getElementById("step1Next").addEventListener("click", () => {
+      if (!selectedRole) {
+        showToast("Please choose who you are", "warning");
+        return;
+      }
+      workerOnlyFields.style.display = selectedRole === "worker" ? "grid" : "none";
+      goToStep(2);
+    });
+
+    document.getElementById("step2Back").addEventListener("click", () => goToStep(1));
+    document.getElementById("step3Back").addEventListener("click", () => goToStep(2));
+
+    Object.entries(categoryMeta).forEach(([key, value]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "category-card touch-target";
+      button.style.background = value.color;
+      button.innerHTML = `<span class="emoji">${value.emoji}</span><span>${value.label}</span>`;
+      button.addEventListener("click", () => {
+        selectedWorkType = key;
+        [...workTypeGrid.children].forEach((node) => node.style.borderColor = "transparent");
+        button.style.borderColor = "var(--primary)";
+      });
+      workTypeGrid.appendChild(button);
+    });
+
+    const rateSlider = document.getElementById("rateSlider");
+    const rateInput = document.getElementById("rateInput");
+    const ratePreview = document.getElementById("ratePreview");
+
+    function syncRate(value) {
+      const numeric = Number(value || 0);
+      rateSlider.value = String(numeric);
+      rateInput.value = String(numeric);
+      ratePreview.textContent = `${formatCurrency(numeric)} per day`;
+    }
+
+    rateSlider.addEventListener("input", () => syncRate(rateSlider.value));
+    rateInput.addEventListener("input", () => syncRate(rateInput.value.replace(/\D/g, "")));
+
+    document.getElementById("detectLocationBtn").addEventListener("click", async () => {
+      const city = await requestCityFromLocation();
+      if (!city) {
+        showToast("Could not detect location. Please type your city.", "warning");
+        return;
+      }
+      document.getElementById("cityInput").value = city;
+      showToast(`Detected: ${city}`, "success");
+    });
+
+    document.getElementById("step2Next").addEventListener("click", () => {
+      clearErrors();
+      const name = document.getElementById("nameInput").value.trim();
+      const phone = document.getElementById("phoneInput").value.trim();
+      const password = document.getElementById("passwordInput").value;
+      const city = document.getElementById("cityInput").value.trim();
+      const rate = Number(rateInput.value || 0);
+
+      let hasError = false;
+      if (name.length < 2) {
+        setError("nameError", "Please enter your full name");
+        hasError = true;
+      }
+      if (phone.replace(/\D/g, "").length !== 10) {
+        setError("phoneError", "Phone number should be 10 digits");
+        hasError = true;
+      }
+      if (password.length < 6) {
+        setError("passwordError", "Password should be at least 6 characters");
+        hasError = true;
+      }
+      if (city.length < 2) {
+        setError("cityError", "Please enter your city");
+        hasError = true;
+      }
+
+      if (selectedRole === "worker") {
+        if (!selectedWorkType) {
+          setError("workTypeError", "Please choose your work type");
+          hasError = true;
+        }
+        if (!rate || rate < 100) {
+          setError("dailyRateError", "Please choose your daily rate");
+          hasError = true;
+        }
+      }
+
+      if (!hasError) {
+        goToStep(3);
+      }
+    });
+
+    function handlePhotoInput(input) {
+      input.addEventListener("change", () => {
+        const file = input.files?.[0];
+        if (!file) {
+          return;
+        }
+        selectedPhotoFile = file;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const preview = document.getElementById("photoPreview");
+          preview.src = reader.result;
+          preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    handlePhotoInput(document.getElementById("cameraInput"));
+    handlePhotoInput(document.getElementById("galleryInput"));
+
+    document.getElementById("skipBtn").addEventListener("click", () => {
+      selectedPhotoFile = null;
+      document.getElementById("createAccountBtn").click();
+    });
+
+    document.getElementById("createAccountBtn").addEventListener("click", async () => {
+      const payload = {
+        role: selectedRole,
+        name: document.getElementById("nameInput").value.trim(),
+        phone: document.getElementById("phoneInput").value.trim(),
+        password: document.getElementById("passwordInput").value,
+        city: document.getElementById("cityInput").value.trim(),
+        workType: selectedWorkType,
+        dailyRate: Number(rateInput.value || 0),
+        photoFile: selectedPhotoFile
+      };
+
+      showLoading("Creating your account...");
+      const result = await registerUser(payload);
+      hideLoading();
+
+      if (!result.ok) {
+        clearErrors();
+        Object.entries(result.errors || {}).forEach(([key, message]) => {
+          const idMap = {
+            name: "nameError",
+            phone: "phoneError",
+            password: "passwordError",
+            city: "cityError",
+            workType: "workTypeError",
+            dailyRate: "dailyRateError"
+          };
+          if (idMap[key]) {
+            setError(idMap[key], message);
+          }
+        });
+        showToast("Please fix highlighted details.", "warning");
+        if (currentStep !== 2) {
+          goToStep(2);
+        }
+        return;
+      }
+
+      showSuccessOverlay("✅ Account Created!");
+      setTimeout(() => {
+        window.location.href = selectedRole === "worker" ? "worker-dashboard.html" : "employer-dashboard.html";
+      }, 1200);
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const roleParam = params.get("role");
+    if (roleParam && ["worker", "employer"].includes(roleParam)) {
+      const roleCard = document.querySelector(`[data-role-card="${roleParam}"]`);
+      roleCard?.click();
+    }
+
+    initCommonUI();
+  </script>
+</body>
+</html>

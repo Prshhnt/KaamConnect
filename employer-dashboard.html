@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" class="page-enter">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employer Dashboard - DailyWork</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="container section">
+    <h1>Hello, Mehta House! 👋</h1>
+
+    <button class="card" id="postJobBtn" style="width:100%;text-align:left;background:var(--primary);color:#fff;border:none">
+      <h2 style="color:#fff">➕ Post a New Job</h2>
+      <p style="color:#fff">Takes just 2 minutes</p>
+    </button>
+
+    <section class="stats-grid" style="margin-top:12px">
+      <article class="card stat-card"><p class="stat-value">2</p><p>Active Jobs</p></article>
+      <article class="card stat-card"><p class="stat-value">5</p><p>Pending Applic.</p></article>
+      <article class="card stat-card"><p class="stat-value">8</p><p>Workers Hired</p></article>
+    </section>
+
+    <section style="margin-top:14px">
+      <h2>📋 My Posted Jobs</h2>
+      <div id="postedJobs" class="dashboard-grid" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card" style="margin-top:14px">
+      <h2>Electrician Job — 3 Applied</h2>
+      <div id="applicantsList" class="dashboard-grid" style="margin-top:10px"></div>
+    </section>
+
+    <div class="spacer-bottom-nav"></div>
+  </main>
+
+  <div class="sheet" id="postJobSheet">
+    <div class="sheet-backdrop"></div>
+    <div class="sheet-panel">
+      <div class="drag-handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3>Post a New Job</h3>
+        <button class="icon-btn touch-target" id="closePostSheet"><i class="ph ph-x"></i></button>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="input-label">What kind of worker do you need?</label>
+        <div class="category-grid" id="jobCategoryGrid"></div>
+      </div>
+
+      <div class="input-group" style="margin-top:12px">
+        <label class="input-label">📍 Where is the work?</label>
+        <input class="input" id="jobCityInput" placeholder="Enter area / locality">
+        <p class="field-error" id="jobCityError"></p>
+      </div>
+
+      <div class="input-group" style="margin-top:12px">
+        <label class="input-label">💰 How much will you pay per day?</label>
+        <input class="input" id="jobRateInput" inputmode="numeric" value="500">
+        <p class="field-error" id="jobRateError"></p>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="input-label">⏱ How long is the work?</label>
+        <div class="filter-chips" id="durationChips">
+          <button class="chip touch-target active" data-duration="1 Day">1 Day</button>
+          <button class="chip touch-target" data-duration="2-3 Days">2-3 Days</button>
+          <button class="chip touch-target" data-duration="1 Week">1 Week</button>
+          <button class="chip touch-target" data-duration="Ongoing">Ongoing</button>
+        </div>
+      </div>
+
+      <details style="margin-top:10px">
+        <summary>Add more details ▼</summary>
+        <textarea class="input" id="jobDetailsInput" style="border-radius:16px;min-height:100px;margin-top:8px" placeholder="Optional details"></textarea>
+      </details>
+
+      <button class="btn btn-primary touch-target" id="postNowBtn" style="width:100%;margin-top:14px">🚀 Post Job Now</button>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="employer-dashboard.html" class="bottom-tab active"><i class="ph-fill ph-house"></i><span>Home</span></a>
+    <a href="search.html" class="bottom-tab"><i class="ph ph-magnifying-glass"></i><span>Search</span></a>
+    <a href="employer-dashboard.html" class="bottom-tab"><i class="ph ph-briefcase"></i><span>Jobs</span></a>
+    <a href="login.html" class="bottom-tab"><i class="ph ph-user"></i><span>Profile</span></a>
+  </nav>
+
+  <script type="module">
+    import { initCommonUI, categoryMeta, initBottomSheet, showToast, showSuccessOverlay } from "./main.js";
+
+    const postedJobs = [
+      { title: "⚡ Electrician", status: "open", text: "3 people applied · Posted 1 day ago" },
+      { title: "🧹 Maid", status: "open", text: "2 people applied · Posted 3 days ago" }
+    ];
+
+    document.getElementById("postedJobs").innerHTML = postedJobs.map((job) => `
+      <article class="card">
+        <h3>${job.title} · <span class="badge ${job.status}">${job.status.toUpperCase()}</span></h3>
+        <p>${job.text}</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <button class="btn btn-outline touch-target">See Applicants</button>
+          <button class="btn btn-outline touch-target" data-close-job>Close Job</button>
+        </div>
+      </article>
+    `).join("");
+
+    document.querySelectorAll("[data-close-job]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const yes = confirm("Are you sure you want to close this job?");
+        if (yes) {
+          showToast("Job closed", "success");
+        }
+      });
+    });
+
+    const applicants = [
+      { name: "Ramesh Kumar", rating: 4.9, reviews: 47, exp: 8, rate: 600, distance: 2.3 },
+      { name: "Shamim Ali", rating: 4.6, reviews: 21, exp: 6, rate: 550, distance: 4.9 }
+    ];
+
+    document.getElementById("applicantsList").innerHTML = applicants.map((item, index) => `
+      <article class="card">
+        <h3>${item.name}</h3>
+        <p>⭐ ${item.rating} · ${item.reviews} reviews</p>
+        <p>${item.exp} years · ₹${item.rate}/day · 📍 ${item.distance} km away</p>
+        <div style="display:grid;gap:8px;margin-top:10px">
+          <button class="btn btn-outline touch-target">👁 View Profile</button>
+          <button class="btn btn-primary touch-target" data-accept="${index}">✅ Accept & Get Number</button>
+          <button class="btn btn-outline touch-target">❌ Reject</button>
+          <a href="tel:9876543210" class="btn btn-primary touch-target" data-call="${index}" style="display:none">📞 Call Now</a>
+        </div>
+      </article>
+    `).join("");
+
+    document.querySelectorAll("[data-accept]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.getAttribute("data-accept");
+        const callButton = document.querySelector(`[data-call='${id}']`);
+        if (callButton) {
+          callButton.style.display = "inline-flex";
+        }
+        button.textContent = "✅ Accepted";
+        button.disabled = true;
+        showToast("Worker accepted. Phone unlocked.", "success");
+      });
+    });
+
+    const jobCategoryGrid = document.getElementById("jobCategoryGrid");
+    let selectedCategory = "";
+    let selectedDuration = "1 Day";
+
+    Object.entries(categoryMeta).forEach(([key, value]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "category-card touch-target";
+      button.style.background = value.color;
+      button.innerHTML = `<span class='emoji'>${value.emoji}</span><span>${value.label}</span>`;
+      button.addEventListener("click", () => {
+        selectedCategory = key;
+        [...jobCategoryGrid.children].forEach((node) => node.style.borderColor = "transparent");
+        button.style.borderColor = "var(--primary)";
+      });
+      jobCategoryGrid.appendChild(button);
+    });
+
+    document.getElementById("durationChips").addEventListener("click", (event) => {
+      const chip = event.target.closest("[data-duration]");
+      if (!chip) {
+        return;
+      }
+      selectedDuration = chip.dataset.duration;
+      document.querySelectorAll("#durationChips .chip").forEach((item) => item.classList.remove("active"));
+      chip.classList.add("active");
+    });
+
+    document.getElementById("postNowBtn").addEventListener("click", () => {
+      const city = document.getElementById("jobCityInput").value.trim();
+      const rate = Number(document.getElementById("jobRateInput").value || 0);
+      document.getElementById("jobCityError").classList.remove("visible");
+      document.getElementById("jobRateError").classList.remove("visible");
+
+      let invalid = false;
+      if (!selectedCategory) {
+        showToast("Please choose worker type", "warning");
+        invalid = true;
+      }
+      if (city.length < 2) {
+        const node = document.getElementById("jobCityError");
+        node.textContent = "Please enter work area";
+        node.classList.add("visible");
+        invalid = true;
+      }
+      if (!rate || rate < 100) {
+        const node = document.getElementById("jobRateError");
+        node.textContent = "Please enter daily wage";
+        node.classList.add("visible");
+        invalid = true;
+      }
+      if (invalid) {
+        return;
+      }
+
+      showSuccessOverlay("✅ Job Posted!");
+      showToast(`Workers will contact you soon for ${selectedDuration}`, "success");
+      document.getElementById("postJobSheet").classList.remove("open");
+    });
+
+    initBottomSheet("#postJobBtn", "#postJobSheet", "#closePostSheet");
+    initCommonUI();
+  </script>
+</body>
+</html>

@@ -1,0 +1,416 @@
+import { applyTranslations, setupLanguageSwitcher, maybeShowLanguageHint, getCurrentLanguage, loadLocale } from "./i18n.js";
+
+const categoryMeta = {
+  electrician: { emoji: "⚡", label: "Electrician", color: "#FEF3C7", accent: "#CA8A04" },
+  plumber: { emoji: "🔧", label: "Plumber", color: "#DBEAFE", accent: "#1D4ED8" },
+  carpenter: { emoji: "🪚", label: "Carpenter", color: "#FDE68A", accent: "#92400E" },
+  maid: { emoji: "🧹", label: "Maid", color: "#EDE9FE", accent: "#6D28D9" },
+  mechanic: { emoji: "🔩", label: "Mechanic", color: "#E7E5E4", accent: "#57534E" },
+  painter: { emoji: "🎨", label: "Painter", color: "#FCE7F3", accent: "#BE185D" },
+  mason: { emoji: "🧱", label: "Mason", color: "#FFEDD5", accent: "#C2410C" },
+  driver: { emoji: "🚗", label: "Driver", color: "#DCFCE7", accent: "#15803D" },
+  cook: { emoji: "🍳", label: "Cook", color: "#FEE2E2", accent: "#B91C1C" },
+  welder: { emoji: "🔥", label: "Welder", color: "#D6D3D1", accent: "#1C1917" },
+  labour: { emoji: "🏗", label: "Labour", color: "#FAE8D4", accent: "#A16207" },
+  other: { emoji: "🧰", label: "Other", color: "#F5F5F4", accent: "#44403C" }
+};
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0
+  }).format(Number(value || 0));
+}
+
+function getRelativeDateLabel(isoOrDate) {
+  const now = Date.now();
+  const time = new Date(isoOrDate).getTime();
+  const diff = now - time;
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  if (diff < hour) {
+    const mins = Math.max(1, Math.round(diff / minute));
+    return `${mins} min ago`;
+  }
+  if (diff < day) {
+    const hours = Math.max(1, Math.round(diff / hour));
+    return `${hours}h ago`;
+  }
+  const days = Math.max(1, Math.round(diff / day));
+  if (days === 1) {
+    return "Yesterday";
+  }
+  return `${days} days ago`;
+}
+
+function ensureToastRoot() {
+  let root = document.querySelector(".toast-root");
+  if (!root) {
+    root = document.createElement("div");
+    root.className = "toast-root";
+    document.body.appendChild(root);
+  }
+  return root;
+}
+
+function showToast(message, type = "success") {
+  const root = ensureToastRoot();
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+
+  const iconMap = {
+    success: "✅",
+    error: "❌",
+    warning: "⚠️"
+  };
+
+  toast.innerHTML = `<span>${iconMap[type] || "ℹ️"}</span><span>${message}</span>`;
+  root.appendChild(toast);
+
+  window.setTimeout(() => {
+    toast.classList.add("hide");
+    window.setTimeout(() => toast.remove(), 280);
+  }, 3000);
+}
+
+function showLoading(text = "Loading...") {
+  if (document.querySelector(".full-loader")) {
+    return;
+  }
+  const loader = document.createElement("div");
+  loader.className = "full-loader";
+  loader.innerHTML = `
+    <div class="spinner-lg"></div>
+    <p>${text}</p>
+  `;
+  document.body.appendChild(loader);
+}
+
+function hideLoading() {
+  const loader = document.querySelector(".full-loader");
+  if (loader) {
+    loader.remove();
+  }
+}
+
+function showEmptyState({ container, emoji = "😔", title = "No data", message = "Try again", buttonText, onAction }) {
+  if (!container) {
+    return;
+  }
+  container.innerHTML = `
+    <div class="empty-state card">
+      <div class="empty-emoji">${emoji}</div>
+      <h3>${title}</h3>
+      <p>${message}</p>
+      ${buttonText ? `<button class="btn btn-primary touch-target" data-empty-action>${buttonText}</button>` : ""}
+    </div>
+  `;
+  if (buttonText && typeof onAction === "function") {
+    container.querySelector("[data-empty-action]")?.addEventListener("click", onAction);
+  }
+}
+
+function showError({ container, message = "Something went wrong. Please try again.", retryText = "Retry", onRetry }) {
+  if (!container) {
+    return;
+  }
+  container.innerHTML = `
+    <div class="error-state card">
+      <div class="empty-emoji">📶</div>
+      <h3>Oops!</h3>
+      <p>${message}</p>
+      <button class="btn btn-outline touch-target" data-error-retry>${retryText}</button>
+    </div>
+  `;
+  container.querySelector("[data-error-retry]")?.addEventListener("click", () => {
+    if (typeof onRetry === "function") {
+      onRetry();
+    }
+  });
+}
+
+function renderWorkerCard(worker) {
+  const category = categoryMeta[worker.category] || categoryMeta.other;
+  const statusClass = worker.available ? "available" : "busy";
+  const statusLabel = worker.available ? "Available" : "Busy";
+
+  return `
+    <article class="worker-card card list-item" style="--card-accent:${category.accent}">
+      <div class="worker-top">
+        <img src="${worker.photo || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=60"}" alt="${worker.name}" class="worker-photo" loading="lazy">
+        <div class="worker-meta">
+          <div class="worker-headline">
+            <h4>${worker.name}</h4>
+            <span class="status-pill ${statusClass}"><span class="status-dot ${statusClass}"></span>${statusLabel}</span>
+          </div>
+          <p>${category.emoji} ${category.label} · ${worker.distance ? `📍 ${worker.distance} km away` : worker.city}</p>
+          <p>⭐ ${worker.rating} (${worker.reviews} reviews)</p>
+          <p>💰 ${formatCurrency(worker.rate)}/day · ${worker.experience} years experience</p>
+        </div>
+      </div>
+      <div class="worker-actions">
+        <a href="tel:${worker.phone || ""}" class="btn btn-primary touch-target">📞 Contact</a>
+        <a href="worker-profile.html?id=${worker.id}" class="btn btn-outline touch-target">👁 View Profile</a>
+      </div>
+    </article>
+  `;
+}
+
+function renderJobCard(job) {
+  return `
+    <article class="job-card card list-item">
+      <div class="job-top">
+        <h4>${job.title}</h4>
+        <span class="badge ${job.status || "pending"}">${String(job.status || "pending").toUpperCase()}</span>
+      </div>
+      <p>${job.location} · ${formatCurrency(job.rate)}/day</p>
+      <p>${job.duration} · Posted ${getRelativeDateLabel(job.createdAt)}</p>
+      <div class="worker-actions">
+        <button class="btn btn-outline touch-target" data-job-view="${job.id}">👁 View</button>
+        <button class="btn btn-primary touch-target" data-job-apply="${job.id}">🚀 Apply</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderSkeletonCards(container, count = 3) {
+  if (!container) {
+    return;
+  }
+  container.innerHTML = "";
+  for (let i = 0; i < count; i += 1) {
+    const item = document.createElement("div");
+    item.className = "card skeleton-card";
+    item.innerHTML = `
+      <div class="skeleton" style="height:20px;width:55%;margin-bottom:12px"></div>
+      <div class="skeleton" style="height:14px;width:85%;margin-bottom:10px"></div>
+      <div class="skeleton" style="height:14px;width:75%;margin-bottom:16px"></div>
+      <div class="skeleton" style="height:52px;width:100%"></div>
+    `;
+    container.appendChild(item);
+  }
+}
+
+function animateCounter(node, target) {
+  const start = 0;
+  const duration = 1200;
+  const startTime = performance.now();
+
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const value = Math.floor(start + (target - start) * eased);
+    node.textContent = String(value);
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+function initAnimatedCounters() {
+  const counters = document.querySelectorAll("[data-counter]");
+  if (!counters.length) {
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const target = Number(entry.target.getAttribute("data-counter"));
+        animateCounter(entry.target, target);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+
+  counters.forEach((node) => observer.observe(node));
+}
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+    const data = await response.json();
+    return data?.address?.city || data?.address?.town || data?.address?.state_district || data?.display_name || "";
+  } catch {
+    return "";
+  }
+}
+
+async function requestCityFromLocation() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve("");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const city = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+      resolve(city);
+    }, () => resolve(""), {
+      enableHighAccuracy: true,
+      timeout: 8000
+    });
+  });
+}
+
+function setupPullToRefresh(callback) {
+  let startY = 0;
+  let pulling = false;
+
+  window.addEventListener("touchstart", (event) => {
+    if (window.scrollY === 0) {
+      startY = event.touches[0].clientY;
+      pulling = true;
+    }
+  });
+
+  window.addEventListener("touchmove", (event) => {
+    if (!pulling) {
+      return;
+    }
+    const deltaY = event.touches[0].clientY - startY;
+    if (deltaY > 90 && typeof callback === "function") {
+      pulling = false;
+      callback();
+    }
+  });
+
+  window.addEventListener("touchend", () => {
+    pulling = false;
+  });
+}
+
+function setupMobileMenu() {
+  const menuButton = document.querySelector("[data-menu-toggle]");
+  const drawer = document.querySelector("[data-drawer]");
+  const close = document.querySelector("[data-drawer-close]");
+  const backdrop = document.querySelector("[data-drawer-backdrop]");
+
+  if (!menuButton || !drawer || !backdrop) {
+    return;
+  }
+
+  const open = () => {
+    drawer.classList.add("open");
+    backdrop.classList.add("open");
+    document.body.classList.add("no-scroll");
+  };
+
+  const hide = () => {
+    drawer.classList.remove("open");
+    backdrop.classList.remove("open");
+    document.body.classList.remove("no-scroll");
+  };
+
+  menuButton.addEventListener("click", open);
+  close?.addEventListener("click", hide);
+  backdrop.addEventListener("click", hide);
+}
+
+function setupSearchExpand() {
+  const trigger = document.querySelector("[data-search-expand]");
+  const overlay = document.querySelector("[data-search-overlay]");
+  const close = document.querySelector("[data-search-close]");
+
+  if (!trigger || !overlay || !close) {
+    return;
+  }
+
+  trigger.addEventListener("click", () => overlay.classList.add("open"));
+  close.addEventListener("click", () => overlay.classList.remove("open"));
+}
+
+function setupConnectionHint() {
+  const hint = document.querySelector("[data-connection-hint]");
+  if (!hint) {
+    return;
+  }
+
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (!connection) {
+    return;
+  }
+
+  const slow = ["slow-2g", "2g"].includes(connection.effectiveType);
+  if (slow) {
+    hint.classList.add("visible");
+  }
+}
+
+function showSuccessOverlay(message = "Success!") {
+  const overlay = document.createElement("div");
+  overlay.className = "success-overlay";
+  overlay.innerHTML = `
+    <div class="success-card">
+      <div class="checkmark">✅</div>
+      <h3>${message}</h3>
+      <p>You are all set.</p>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  window.setTimeout(() => {
+    overlay.classList.add("hide");
+    window.setTimeout(() => overlay.remove(), 400);
+  }, 1600);
+}
+
+async function getText(key, fallback = "") {
+  try {
+    const locale = await loadLocale(getCurrentLanguage());
+    return key.split(".").reduce((acc, part) => (acc ? acc[part] : undefined), locale) || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function initBottomSheet(triggerSelector, sheetSelector, closeSelector) {
+  const trigger = document.querySelector(triggerSelector);
+  const sheet = document.querySelector(sheetSelector);
+  const close = document.querySelector(closeSelector);
+
+  if (!trigger || !sheet) {
+    return;
+  }
+
+  const open = () => sheet.classList.add("open");
+  const hide = () => sheet.classList.remove("open");
+
+  trigger.addEventListener("click", open);
+  close?.addEventListener("click", hide);
+  sheet.querySelector(".sheet-backdrop")?.addEventListener("click", hide);
+}
+
+async function initCommonUI() {
+  setupLanguageSwitcher();
+  maybeShowLanguageHint();
+  setupMobileMenu();
+  setupSearchExpand();
+  setupConnectionHint();
+  initAnimatedCounters();
+  await applyTranslations();
+}
+
+export {
+  categoryMeta,
+  formatCurrency,
+  showToast,
+  showLoading,
+  hideLoading,
+  showEmptyState,
+  showError,
+  renderWorkerCard,
+  renderJobCard,
+  renderSkeletonCards,
+  requestCityFromLocation,
+  setupPullToRefresh,
+  initBottomSheet,
+  showSuccessOverlay,
+  initCommonUI,
+  getText
+};
