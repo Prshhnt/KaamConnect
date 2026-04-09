@@ -19,15 +19,15 @@
     </div>
 
     <div class="tab-toggle" id="modeToggle">
-      <button class="active touch-target" data-mode="workers">Find Workers ✓</button>
+      <button class="active touch-target" data-mode="workers"><i class="ph ph-hard-hat"></i> Find Workers</button>
       <button class="touch-target" data-mode="jobs">Find Jobs</button>
     </div>
 
     <section class="card" id="locationBanner" style="margin-top:12px;background:var(--warning-light)">
-      <h3>📍 Allow location for better results nearby</h3>
+      <h3><i class="ph ph-map-pin"></i> Allow location for better results nearby</h3>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-primary touch-target" id="allowLocationBtn">Allow Location Access</button>
-        <button class="btn btn-outline touch-target" id="enterCityBtn">Enter City →</button>
+        <button class="btn btn-outline touch-target" id="enterCityBtn">Enter City <i class="ph ph-arrow-right"></i></button>
       </div>
     </section>
 
@@ -44,28 +44,28 @@
       </div>
 
       <div class="range-wrap" style="margin-top:10px">
-        <label>📍 Distance: <span id="distanceValue">10</span> km</label>
+        <label><i class="ph ph-map-pin"></i> Distance: <span id="distanceValue">10</span> km</label>
         <input type="range" id="distanceRange" min="1" max="50" value="10" class="touch-target">
       </div>
 
       <div style="margin-top:14px">
-        <label>💼 Category</label>
+        <label><i class="ph ph-squares-four"></i> Category</label>
         <div class="filter-chips" id="categoryChips"></div>
       </div>
 
       <div class="range-wrap" style="margin-top:14px">
-        <label>💰 Daily Rate: ₹<span id="rateMin">200</span> - ₹<span id="rateMax">2000</span></label>
+        <label><i class="ph ph-currency-inr"></i> Daily Rate: ₹<span id="rateMin">200</span> - ₹<span id="rateMax">2000</span></label>
         <input type="range" id="rateMinInput" min="100" max="2500" value="200" step="50" class="touch-target">
         <input type="range" id="rateMaxInput" min="100" max="2500" value="2000" step="50" class="touch-target">
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
-        <label>✅ Available Only</label>
+        <label><i class="ph ph-check-circle"></i> Available Only</label>
         <button id="availableToggle" class="toggle touch-target active"></button>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
-        <label>⭐ Min Rating</label>
+        <label><i class="ph ph-star"></i> Min Rating</label>
         <select id="ratingInput" class="input" style="min-height:52px;max-width:150px">
           <option value="0">Any</option>
           <option value="3">3+</option>
@@ -115,7 +115,7 @@
     function buildCategoryChips() {
       categoryChips.innerHTML = Object.entries(categoryMeta).map(([key, value]) => {
         const activeClass = state.selectedCategory === key ? "active" : "";
-        return `<button class="chip touch-target ${activeClass}" data-chip="${key}">${value.emoji} ${value.label}</button>`;
+        return `<button class="chip touch-target ${activeClass}" data-chip="${key}"><i class="${value.icon}"></i> ${value.label}</button>`;
       }).join("");
     }
 
@@ -149,10 +149,9 @@
           if (!data.length) {
             showEmptyState({
               container: resultsNode,
-              emoji: "😔",
               title: "No workers found nearby",
               message: "Try expanding your search radius",
-              buttonText: "🔍 Expand Search",
+              buttonText: "Expand Search",
               onAction: () => {
                 state.distance = Math.min(50, state.distance + 10);
                 document.getElementById("distanceRange").value = String(state.distance);
@@ -168,7 +167,7 @@
           resultsNode.innerHTML = jobs.map(renderJobCard).join("");
           resultsNode.querySelectorAll("[data-job-apply]").forEach((button) => {
             button.addEventListener("click", () => {
-              showSuccessOverlay("✅ Applied Successfully!");
+              showSuccessOverlay("Applied Successfully!");
               showToast("Application sent to employer", "success");
             });
           });

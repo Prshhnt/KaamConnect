@@ -11,6 +11,7 @@ It is built with HTML5, CSS3, and Vanilla JavaScript, with Appwrite as backend.
 - Fonts: Baloo 2, Hind, Noto Sans Devanagari
 - Icons: Phosphor Icons CDN
 - i18n: Custom JS switcher (EN / HI / MR)
+- Auth: Appwrite email/password plus Google OAuth
 
 ## Files
 
@@ -70,7 +71,7 @@ It is built with HTML5, CSS3, and Vanilla JavaScript, with Appwrite as backend.
    - status (string)
 7. Create Storage bucket for worker photos.
 8. Configure permissions so users can only edit their own profile and postings.
-9. Enable Phone/Auth flow according to your production strategy.
+9. Enable Email/Password authentication and Google OAuth in Appwrite.
 
 ## Run Locally
 

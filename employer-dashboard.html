@@ -12,10 +12,10 @@
 </head>
 <body>
   <main class="container section">
-    <h1>Hello, Mehta House! 👋</h1>
+    <h1>Hello, Mehta House</h1>
 
     <button class="card" id="postJobBtn" style="width:100%;text-align:left;background:var(--primary);color:#fff;border:none">
-      <h2 style="color:#fff">➕ Post a New Job</h2>
+      <h2 style="color:#fff"><i class="ph ph-plus-circle"></i> Post a New Job</h2>
       <p style="color:#fff">Takes just 2 minutes</p>
     </button>
 
@@ -26,7 +26,7 @@
     </section>
 
     <section style="margin-top:14px">
-      <h2>📋 My Posted Jobs</h2>
+      <h2><i class="ph ph-briefcase"></i> My Posted Jobs</h2>
       <div id="postedJobs" class="dashboard-grid" style="margin-top:10px"></div>
     </section>
 
@@ -53,19 +53,19 @@
       </div>
 
       <div class="input-group" style="margin-top:12px">
-        <label class="input-label">📍 Where is the work?</label>
+        <label class="input-label"><i class="ph ph-map-pin"></i> Where is the work?</label>
         <input class="input" id="jobCityInput" placeholder="Enter area / locality">
         <p class="field-error" id="jobCityError"></p>
       </div>
 
       <div class="input-group" style="margin-top:12px">
-        <label class="input-label">💰 How much will you pay per day?</label>
+        <label class="input-label"><i class="ph ph-currency-inr"></i> How much will you pay per day?</label>
         <input class="input" id="jobRateInput" inputmode="numeric" value="500">
         <p class="field-error" id="jobRateError"></p>
       </div>
 
       <div style="margin-top:12px">
-        <label class="input-label">⏱ How long is the work?</label>
+        <label class="input-label"><i class="ph ph-clock"></i> How long is the work?</label>
         <div class="filter-chips" id="durationChips">
           <button class="chip touch-target active" data-duration="1 Day">1 Day</button>
           <button class="chip touch-target" data-duration="2-3 Days">2-3 Days</button>
@@ -79,12 +79,12 @@
         <textarea class="input" id="jobDetailsInput" style="border-radius:16px;min-height:100px;margin-top:8px" placeholder="Optional details"></textarea>
       </details>
 
-      <button class="btn btn-primary touch-target" id="postNowBtn" style="width:100%;margin-top:14px">🚀 Post Job Now</button>
+      <button class="btn btn-primary touch-target" id="postNowBtn" style="width:100%;margin-top:14px"><i class="ph ph-rocket-launch"></i> Post Job Now</button>
     </div>
   </div>
 
   <nav class="bottom-nav">
-    <a href="employer-dashboard.html" class="bottom-tab active"><i class="ph-fill ph-house"></i><span>Home</span></a>
+    <a href="employer-dashboard.html" class="bottom-tab active"><i class="ph ph-house"></i><span>Home</span></a>
     <a href="search.html" class="bottom-tab"><i class="ph ph-magnifying-glass"></i><span>Search</span></a>
     <a href="employer-dashboard.html" class="bottom-tab"><i class="ph ph-briefcase"></i><span>Jobs</span></a>
     <a href="login.html" class="bottom-tab"><i class="ph ph-user"></i><span>Profile</span></a>
@@ -94,8 +94,8 @@
     import { initCommonUI, categoryMeta, initBottomSheet, showToast, showSuccessOverlay } from "./main.js";
 
     const postedJobs = [
-      { title: "⚡ Electrician", status: "open", text: "3 people applied · Posted 1 day ago" },
-      { title: "🧹 Maid", status: "open", text: "2 people applied · Posted 3 days ago" }
+      { title: "Electrician", status: "open", text: "3 people applied · Posted 1 day ago" },
+      { title: "Maid", status: "open", text: "2 people applied · Posted 3 days ago" }
     ];
 
     document.getElementById("postedJobs").innerHTML = postedJobs.map((job) => `
@@ -126,13 +126,13 @@
     document.getElementById("applicantsList").innerHTML = applicants.map((item, index) => `
       <article class="card">
         <h3>${item.name}</h3>
-        <p>⭐ ${item.rating} · ${item.reviews} reviews</p>
-        <p>${item.exp} years · ₹${item.rate}/day · 📍 ${item.distance} km away</p>
+        <p><i class="ph ph-star"></i> ${item.rating} · ${item.reviews} reviews</p>
+        <p>${item.exp} years · ₹${item.rate}/day · <i class="ph ph-map-pin"></i> ${item.distance} km away</p>
         <div style="display:grid;gap:8px;margin-top:10px">
-          <button class="btn btn-outline touch-target">👁 View Profile</button>
-          <button class="btn btn-primary touch-target" data-accept="${index}">✅ Accept & Get Number</button>
-          <button class="btn btn-outline touch-target">❌ Reject</button>
-          <a href="tel:9876543210" class="btn btn-primary touch-target" data-call="${index}" style="display:none">📞 Call Now</a>
+          <button class="btn btn-outline touch-target"><i class="ph ph-eye"></i> View Profile</button>
+          <button class="btn btn-primary touch-target" data-accept="${index}"><i class="ph ph-check-circle"></i> Accept & Get Number</button>
+          <button class="btn btn-outline touch-target"><i class="ph ph-x-circle"></i> Reject</button>
+          <a href="tel:9876543210" class="btn btn-primary touch-target" data-call="${index}" style="display:none"><i class="ph ph-phone"></i> Call Now</a>
         </div>
       </article>
     `).join("");
@@ -144,7 +144,7 @@
         if (callButton) {
           callButton.style.display = "inline-flex";
         }
-        button.textContent = "✅ Accepted";
+        button.innerHTML = '<i class="ph ph-check-circle"></i> Accepted';
         button.disabled = true;
         showToast("Worker accepted. Phone unlocked.", "success");
       });
@@ -159,7 +159,7 @@
       button.type = "button";
       button.className = "category-card touch-target";
       button.style.background = value.color;
-      button.innerHTML = `<span class='emoji'>${value.emoji}</span><span>${value.label}</span>`;
+      button.innerHTML = `<span class='emoji'><i class='${value.icon}'></i></span><span>${value.label}</span>`;
       button.addEventListener("click", () => {
         selectedCategory = key;
         [...jobCategoryGrid.children].forEach((node) => node.style.borderColor = "transparent");
@@ -205,7 +205,7 @@
         return;
       }
 
-      showSuccessOverlay("✅ Job Posted!");
+      showSuccessOverlay("Job Posted!");
       showToast(`Workers will contact you soon for ${selectedDuration}`, "success");
       document.getElementById("postJobSheet").classList.remove("open");
     });

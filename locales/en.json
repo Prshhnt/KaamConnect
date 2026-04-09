@@ -23,7 +23,7 @@
   },
   "login": {
     "title": "Welcome Back!",
-    "phone": "Phone Number",
+    "email": "Email Address",
     "password": "Password",
     "button": "Login",
     "show": "Show",

@@ -13,7 +13,7 @@
 <body>
   <header class="navbar">
     <div class="nav-inner">
-      <a href="index.html" class="brand">🔧 <span data-i18n="common.brand">KaamConnect</span></a>
+      <a href="index.html" class="brand"><i class="ph ph-toolbox"></i> <span data-i18n="common.brand">KaamConnect</span></a>
       <button class="search-pill mobile-only touch-target" data-search-expand>
         <i class="ph ph-magnifying-glass"></i>
         <span data-i18n="common.searchPlaceholder">Search workers near you...</span>
@@ -23,7 +23,7 @@
         <span data-i18n="common.searchPlaceholder">Search workers near you...</span>
       </div>
       <button class="lang-btn touch-target" data-language-switcher>
-        🌐 <span class="lang-label" data-lang-label>English</span>
+        <i class="ph ph-globe"></i> <span class="lang-label" data-lang-label>English</span>
       </button>
       <a href="login.html" class="login-btn touch-target"><i class="ph ph-sign-in"></i><span data-i18n="common.login">Login</span></a>
       <button class="icon-btn touch-target" data-menu-toggle><i class="ph ph-list"></i></button>
@@ -42,14 +42,14 @@
   <aside class="drawer" data-drawer>
     <button class="icon-btn" data-drawer-close><i class="ph ph-x"></i></button>
     <nav class="drawer-menu">
-      <a class="drawer-link" href="index.html">🏠 Home</a>
-      <a class="drawer-link" href="search.html">🔍 Search</a>
-      <a class="drawer-link" href="register.html">📝 Register</a>
-      <a class="drawer-link" href="login.html">🔐 Login</a>
+      <a class="drawer-link" href="index.html"><i class="ph ph-house"></i> Home</a>
+      <a class="drawer-link" href="search.html"><i class="ph ph-magnifying-glass"></i> Search</a>
+      <a class="drawer-link" href="register.html"><i class="ph ph-note-pencil"></i> Register</a>
+      <a class="drawer-link" href="login.html"><i class="ph ph-lock-key"></i> Login</a>
     </nav>
   </aside>
 
-  <div class="language-hint" data-language-hint>Switch language? 🌐 Tap here</div>
+  <div class="language-hint" data-language-hint>Switch language? <i class="ph ph-globe"></i> Tap here</div>
   <div class="connection-hint" data-connection-hint>Slow network detected. Using lighter experience.</div>
 
   <main>
@@ -63,7 +63,7 @@
               <input type="text" data-i18n-placeholder="index.heroInput" placeholder="Enter your city or area..." id="heroCityInput">
               <button aria-label="Search" id="heroSearchBtn"><i class="ph ph-magnifying-glass"></i></button>
             </div>
-            <button id="heroLocationBtn" class="btn btn-outline touch-target" style="margin-top:12px">📍 <span data-i18n="common.useLocation">Use My Location</span></button>
+            <button id="heroLocationBtn" class="btn btn-outline touch-target" style="margin-top:12px"><i class="ph ph-map-pin"></i> <span data-i18n="common.useLocation">Use My Location</span></button>
           </div>
           <div class="hero-illustration">
             <svg viewBox="0 0 400 300" role="img" aria-label="Worker illustration">
@@ -96,9 +96,9 @@
 
     <section class="trust-strip">
       <div class="container trust-grid">
-        <div><p class="trust-number"><span data-counter="500">0</span>+</p><p>👷 Workers</p></div>
-        <div><p class="trust-number"><span data-counter="200">0</span>+</p><p>🏢 Employers</p></div>
-        <div><p class="trust-number"><span data-counter="20">0</span>+</p><p>🏙️ Cities</p></div>
+        <div><p class="trust-number"><span data-counter="500">0</span>+</p><p><i class="ph ph-hard-hat"></i> Workers</p></div>
+        <div><p class="trust-number"><span data-counter="200">0</span>+</p><p><i class="ph ph-buildings"></i> Employers</p></div>
+        <div><p class="trust-number"><span data-counter="20">0</span>+</p><p><i class="ph ph-city"></i> Cities</p></div>
       </div>
     </section>
 
@@ -125,12 +125,12 @@
         <article class="card">
           <h3 data-i18n="index.ctaWorker">Are you a worker?</h3>
           <p data-i18n="index.ctaWorkerSub">Register free and start earning</p>
-          <a class="btn btn-primary touch-target" href="register.html" style="margin-top:12px">👷 Join as Worker</a>
+          <a class="btn btn-primary touch-target" href="register.html" style="margin-top:12px"><i class="ph ph-hard-hat"></i> Join as Worker</a>
         </article>
         <article class="card">
           <h3 data-i18n="index.ctaEmployer">Need workers?</h3>
           <p data-i18n="index.ctaEmployerSub">Post a job in 2 minutes — Free!</p>
-          <a class="btn btn-primary touch-target" href="register.html?role=employer" style="margin-top:12px">🏢 Post a Job</a>
+          <a class="btn btn-primary touch-target" href="register.html?role=employer" style="margin-top:12px"><i class="ph ph-buildings"></i> Post a Job</a>
         </article>
       </div>
     </section>
@@ -149,7 +149,7 @@
       node.href = `search.html?category=${key}`;
       node.className = "category-card touch-target";
       node.style.background = meta.color;
-      node.innerHTML = `<span class="emoji">${meta.emoji}</span><span>${meta.label}</span>`;
+      node.innerHTML = `<span class="emoji"><i class="${meta.icon}"></i></span><span>${meta.label}</span>`;
       categoryGrid.appendChild(node);
     });
 

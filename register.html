@@ -13,24 +13,26 @@
 <body>
   <main class="auth-page">
     <section class="auth-card" style="width:min(720px,100%)">
-      <h1 class="auth-logo">🔧 KaamConnect</h1>
+      <h1 class="auth-logo"><i class="ph ph-toolbox"></i> KaamConnect</h1>
       <div class="progress-wrap">
         <div class="progress-line"><div class="progress-fill" id="progressFill"></div></div>
         <small id="stepText">Step 1 of 3</small>
       </div>
 
+      <button class="btn btn-outline touch-target" id="googleRegisterBtn"><i class="ph ph-globe"></i> Continue with Google</button>
+
       <section id="step1" class="role-cards">
         <h2 data-i18n="register.step1Title">Who are you?</h2>
         <button class="role-card touch-target" data-role-card="worker">
           <div>
-            <div style="font-size:38px">👷</div>
+            <div style="font-size:38px"><i class="ph ph-hard-hat"></i></div>
             <h3>I am a Worker</h3>
             <p>Electrician, Plumber, Maid...</p>
           </div>
         </button>
         <button class="role-card touch-target" data-role-card="employer">
           <div>
-            <div style="font-size:38px">🏢</div>
+            <div style="font-size:38px"><i class="ph ph-buildings"></i></div>
             <h3>I need to Hire</h3>
             <p>Find workers for my home/work</p>
           </div>
@@ -48,12 +50,12 @@
           </div>
 
           <div class="input-group">
-            <label class="input-label">Phone Number</label>
+            <label class="input-label">Email Address</label>
             <div class="input-row">
-              <span class="input-icon">+91</span>
-              <input class="input" id="phoneInput" autocomplete="tel" name="tel" inputmode="numeric" maxlength="10" placeholder="9876543210" style="padding-left:54px">
+              <span class="input-icon"><i class="ph ph-envelope-simple"></i></span>
+              <input class="input" id="emailInput" autocomplete="email" name="email" inputmode="email" placeholder="name@example.com" style="padding-left:54px">
             </div>
-            <p class="field-error" id="phoneError"></p>
+            <p class="field-error" id="emailError"></p>
           </div>
 
           <div class="input-group">
@@ -66,7 +68,7 @@
             <label class="input-label">City</label>
             <input class="input" id="cityInput" placeholder="Your city" autocomplete="address-level2">
             <p class="field-error" id="cityError"></p>
-            <button id="detectLocationBtn" type="button" class="btn btn-primary touch-target">📍 Detect My Location</button>
+            <button id="detectLocationBtn" type="button" class="btn btn-primary touch-target"><i class="ph ph-map-pin"></i> Detect My Location</button>
           </div>
 
           <div id="workerOnlyFields" style="display:none;gap:12px;display:none">
@@ -94,14 +96,14 @@
         <h2 data-i18n="register.step3Title">Add Your Photo (Optional)</h2>
         <div class="photo-upload">
           <div>
-            <div style="font-size:36px">📷</div>
+            <div style="font-size:36px"><i class="ph ph-camera"></i></div>
             <p>Tap to take photo or choose from gallery</p>
             <img id="photoPreview" class="preview-photo" style="display:none;margin:10px auto 0" alt="Preview">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
-          <label class="btn btn-outline touch-target" for="cameraInput">📷 Take Photo</label>
-          <label class="btn btn-outline touch-target" for="galleryInput">🖼 Gallery</label>
+          <label class="btn btn-outline touch-target" for="cameraInput"><i class="ph ph-camera"></i> Take Photo</label>
+          <label class="btn btn-outline touch-target" for="galleryInput"><i class="ph ph-image"></i> Gallery</label>
         </div>
         <input id="cameraInput" type="file" accept="image/*" capture="user" style="display:none">
         <input id="galleryInput" type="file" accept="image/*" style="display:none">
@@ -117,13 +119,14 @@
 
   <script type="module">
     import { initCommonUI, categoryMeta, requestCityFromLocation, showToast, showLoading, hideLoading, showSuccessOverlay, formatCurrency } from "./main.js";
-    import { registerUser } from "./auth.js";
+    import { registerUser, loginWithGoogle } from "./auth.js";
 
     const steps = [document.getElementById("step1"), document.getElementById("step2"), document.getElementById("step3")];
     const progressFill = document.getElementById("progressFill");
     const stepText = document.getElementById("stepText");
     const workerOnlyFields = document.getElementById("workerOnlyFields");
     const workTypeGrid = document.getElementById("workTypeGrid");
+    const googleRegisterBtn = document.getElementById("googleRegisterBtn");
     let currentStep = 1;
     let selectedRole = "";
     let selectedWorkType = "";
@@ -145,7 +148,7 @@
     }
 
     function clearErrors() {
-      ["nameError", "phoneError", "passwordError", "cityError", "workTypeError", "dailyRateError"].forEach((id) => setError(id, ""));
+      ["nameError", "emailError", "passwordError", "cityError", "workTypeError", "dailyRateError"].forEach((id) => setError(id, ""));
     }
 
     document.querySelectorAll("[data-role-card]").forEach((card) => {
@@ -209,7 +212,7 @@
     document.getElementById("step2Next").addEventListener("click", () => {
       clearErrors();
       const name = document.getElementById("nameInput").value.trim();
-      const phone = document.getElementById("phoneInput").value.trim();
+      const email = document.getElementById("emailInput").value.trim();
       const password = document.getElementById("passwordInput").value;
       const city = document.getElementById("cityInput").value.trim();
       const rate = Number(rateInput.value || 0);
@@ -219,8 +222,8 @@
         setError("nameError", "Please enter your full name");
         hasError = true;
       }
-      if (phone.replace(/\D/g, "").length !== 10) {
-        setError("phoneError", "Phone number should be 10 digits");
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        setError("emailError", "Please enter a valid email address");
         hasError = true;
       }
       if (password.length < 6) {
@@ -277,7 +280,7 @@
       const payload = {
         role: selectedRole,
         name: document.getElementById("nameInput").value.trim(),
-        phone: document.getElementById("phoneInput").value.trim(),
+        email: document.getElementById("emailInput").value.trim(),
         password: document.getElementById("passwordInput").value,
         city: document.getElementById("cityInput").value.trim(),
         workType: selectedWorkType,
@@ -294,7 +297,7 @@
         Object.entries(result.errors || {}).forEach(([key, message]) => {
           const idMap = {
             name: "nameError",
-            phone: "phoneError",
+            email: "emailError",
             password: "passwordError",
             city: "cityError",
             workType: "workTypeError",
@@ -304,6 +307,17 @@
             setError(idMap[key], message);
           }
         });
+
+        googleRegisterBtn.addEventListener("click", async () => {
+          try {
+            const target = selectedRole === "worker" ? "worker-dashboard.html" : "employer-dashboard.html";
+            const successUrl = new URL(target, window.location.href).toString();
+            const failureUrl = new URL("register.html", window.location.href).toString();
+            await loginWithGoogle(successUrl, failureUrl);
+          } catch {
+            showToast("Google sign-in could not start. Please try again.", "error");
+          }
+        });
         showToast("Please fix highlighted details.", "warning");
         if (currentStep !== 2) {
           goToStep(2);
@@ -311,7 +325,7 @@
         return;
       }
 
-      showSuccessOverlay("✅ Account Created!");
+      showSuccessOverlay("Account Created!");
       setTimeout(() => {
         window.location.href = selectedRole === "worker" ? "worker-dashboard.html" : "employer-dashboard.html";
       }, 1200);

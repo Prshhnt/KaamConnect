@@ -1,20 +1,16 @@
 import { account, ID } from "./appwrite.js";
 
-function normalizePhone(phone) {
-  return String(phone || "").replace(/\D/g, "").slice(-10);
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
 }
 
-function phoneToPseudoEmail(phone) {
-  return `${normalizePhone(phone)}@kaamconnect.local`;
-}
-
-function validatePhone(phone) {
-  const compact = normalizePhone(phone);
+function validateEmail(email) {
+  const compact = normalizeEmail(email);
   if (!compact) {
-    return "Please enter your phone number";
+    return "Please enter your email address";
   }
-  if (compact.length !== 10) {
-    return "Phone number should be 10 digits";
+  if (!/^\S+@\S+\.\S+$/.test(compact)) {
+    return "Please enter a valid email address";
   }
   return "";
 }
@@ -43,9 +39,9 @@ function validateCity(city) {
   return "";
 }
 
-function validateLoginForm({ phone, password }) {
+function validateLoginForm({ email, password }) {
   return {
-    phone: validatePhone(phone),
+    email: validateEmail(email),
     password: validatePassword(password)
   };
 }
@@ -54,7 +50,7 @@ function validateRegisterForm(payload) {
   const errors = {
     role: payload.role ? "" : "Please choose who you are",
     name: validateName(payload.name),
-    phone: validatePhone(payload.phone),
+    email: validateEmail(payload.email),
     password: validatePassword(payload.password),
     city: validateCity(payload.city)
   };
@@ -80,21 +76,20 @@ function hasErrors(errorMap) {
   return Object.values(errorMap).some(Boolean);
 }
 
-async function loginWithPhonePassword(phone, password) {
-  const errors = validateLoginForm({ phone, password });
+async function loginWithEmailPassword(email, password) {
+  const errors = validateLoginForm({ email, password });
   if (hasErrors(errors)) {
     return { ok: false, errors };
   }
 
   try {
-    const email = phoneToPseudoEmail(phone);
-    const session = await account.createEmailPasswordSession(email, password);
+    const session = await account.createEmailPasswordSession(normalizeEmail(email), password);
     return { ok: true, session, errors: {} };
   } catch (error) {
     return {
       ok: false,
       errors: {
-        phone: "",
+        email: "",
         password: "Wrong password. Try again."
       },
       error
@@ -109,7 +104,7 @@ async function registerUser(payload) {
   }
 
   const userId = ID.unique();
-  const email = phoneToPseudoEmail(payload.phone);
+  const email = normalizeEmail(payload.email);
 
   try {
     const user = await account.create(userId, email, payload.password, payload.name);
@@ -127,11 +122,16 @@ async function registerUser(payload) {
     return {
       ok: false,
       errors: {
-        phone: duplicate ? "This phone number is already registered" : "Could not create account. Please try again."
+        email: duplicate ? "This email is already registered" : "Could not create account. Please try again."
       },
       error
     };
   }
+}
+
+async function loginWithGoogle(successUrl, failureUrl) {
+  const session = await account.createOAuth2Session("google", successUrl, failureUrl);
+  return session;
 }
 
 async function getCurrentUser() {
@@ -153,11 +153,12 @@ async function logout() {
 }
 
 export {
-  normalizePhone,
+  normalizeEmail,
   validateLoginForm,
   validateRegisterForm,
   hasErrors,
-  loginWithPhonePassword,
+  loginWithEmailPassword,
+  loginWithGoogle,
   registerUser,
   getCurrentUser,
   logout

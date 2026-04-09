@@ -13,49 +13,51 @@
 <body>
   <main class="auth-page">
     <section class="auth-card">
-      <h1 class="auth-logo">🔧 KaamConnect</h1>
-      <h2 class="auth-title" data-i18n="login.title">Welcome Back! 👋</h2>
+      <h1 class="auth-logo"><i class="ph ph-toolbox"></i> KaamConnect</h1>
+      <h2 class="auth-title" data-i18n="login.title">Welcome Back</h2>
 
       <div class="tab-toggle" id="roleToggle">
-        <button class="active touch-target" data-role="worker">👷 Worker</button>
-        <button class="touch-target" data-role="employer">🏢 Employer</button>
+        <button class="active touch-target" data-role="worker"><i class="ph ph-hard-hat"></i> Worker</button>
+        <button class="touch-target" data-role="employer"><i class="ph ph-buildings"></i> Employer</button>
       </div>
 
       <div class="input-group">
-        <label class="input-label" for="phoneInput" data-i18n="login.phone">Phone Number</label>
+        <label class="input-label" for="emailInput" data-i18n="login.email">Email Address</label>
         <div class="input-row">
-          <span class="input-icon">📱</span>
-          <input class="input" id="phoneInput" name="tel" autocomplete="tel" inputmode="numeric" maxlength="10" placeholder="9876543210">
+          <span class="input-icon"><i class="ph ph-envelope-simple"></i></span>
+          <input class="input" id="emailInput" name="email" autocomplete="email" inputmode="email" placeholder="name@example.com">
         </div>
-        <p class="field-error" id="phoneError"></p>
+        <p class="field-error" id="emailError"></p>
       </div>
 
       <div class="input-group">
         <label class="input-label" for="passwordInput" data-i18n="login.password">Password</label>
         <div class="input-row">
-          <span class="input-icon">🔒</span>
+          <span class="input-icon"><i class="ph ph-lock-key"></i></span>
           <input class="input" id="passwordInput" name="current-password" autocomplete="current-password" type="password" placeholder="••••••••">
           <button type="button" class="input-action" id="showPasswordBtn" data-i18n="login.show">Show</button>
         </div>
         <p class="field-error" id="passwordError"></p>
       </div>
 
-      <button class="btn btn-primary touch-target" id="loginBtn">🚀 <span data-i18n="login.button">Login</span></button>
+      <button class="btn btn-primary touch-target" id="loginBtn"><i class="ph ph-sign-in"></i> <span data-i18n="login.button">Login</span></button>
+      <button class="btn btn-outline touch-target" id="googleLoginBtn"><i class="ph ph-globe"></i> Continue with Google</button>
       <a href="register.html" style="text-align:center;font-weight:600;color:var(--secondary)">Don't have an account? Register →</a>
     </section>
   </main>
 
   <script type="module">
     import { initCommonUI, showToast, showLoading, hideLoading } from "./main.js";
-    import { loginWithPhonePassword } from "./auth.js";
+    import { loginWithEmailPassword, loginWithGoogle } from "./auth.js";
 
     const roleToggle = document.getElementById("roleToggle");
-    const phoneInput = document.getElementById("phoneInput");
+    const emailInput = document.getElementById("emailInput");
     const passwordInput = document.getElementById("passwordInput");
     const loginBtn = document.getElementById("loginBtn");
-    const phoneError = document.getElementById("phoneError");
+    const emailError = document.getElementById("emailError");
     const passwordError = document.getElementById("passwordError");
     const showPasswordBtn = document.getElementById("showPasswordBtn");
+    const googleLoginBtn = document.getElementById("googleLoginBtn");
 
     let selectedRole = "worker";
 
@@ -81,17 +83,17 @@
     });
 
     loginBtn.addEventListener("click", async () => {
-      setError(phoneError, "");
+      setError(emailError, "");
       setError(passwordError, "");
 
       showLoading("Signing you in...");
-      const result = await loginWithPhonePassword(phoneInput.value.trim(), passwordInput.value);
+      const result = await loginWithEmailPassword(emailInput.value.trim(), passwordInput.value);
       hideLoading();
 
       if (!result.ok) {
-        setError(phoneError, result.errors.phone);
+        setError(emailError, result.errors.email);
         setError(passwordError, result.errors.password);
-        if (!result.errors.phone && !result.errors.password) {
+        if (!result.errors.email && !result.errors.password) {
           showToast("Something went wrong. Please try again.", "error");
         }
         return;
@@ -99,6 +101,17 @@
 
       showToast("Login successful", "success");
       window.location.href = selectedRole === "worker" ? "worker-dashboard.html" : "employer-dashboard.html";
+    });
+
+    googleLoginBtn.addEventListener("click", async () => {
+      try {
+        const target = selectedRole === "worker" ? "worker-dashboard.html" : "employer-dashboard.html";
+        const successUrl = new URL(target, window.location.href).toString();
+        const failureUrl = new URL("login.html", window.location.href).toString();
+        await loginWithGoogle(successUrl, failureUrl);
+      } catch {
+        showToast("Google sign-in could not start. Please try again.", "error");
+      }
     });
 
     initCommonUI();

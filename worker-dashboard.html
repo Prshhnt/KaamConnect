@@ -12,12 +12,12 @@
 </head>
 <body>
   <main class="container section">
-    <h1>Good morning, Ramesh! 👋</h1>
+    <h1>Good morning, Ramesh</h1>
 
     <section class="card" style="margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
         <div>
-          <h3>You are currently: <span id="availabilityText" style="color:var(--success)">🟢 AVAILABLE</span></h3>
+          <h3>You are currently: <span id="availabilityText" style="color:var(--success)"><i class="ph ph-circle-fill"></i> AVAILABLE</span></h3>
           <p>Toggle to go Busy</p>
         </div>
         <button class="toggle touch-target active" id="availabilityToggle"></button>
@@ -27,11 +27,11 @@
     <section class="stats-grid" style="margin-top:12px">
       <article class="card stat-card"><p class="stat-value">3</p><p>Active Apps</p></article>
       <article class="card stat-card"><p class="stat-value">12</p><p>Total Jobs</p></article>
-      <article class="card stat-card"><p class="stat-value">⭐ 4.8</p><p>Rating</p></article>
+      <article class="card stat-card"><p class="stat-value"><i class="ph ph-star"></i> 4.8</p><p>Rating</p></article>
     </section>
 
     <section style="margin-top:14px">
-      <h2>📋 New Jobs Matching You</h2>
+      <h2><i class="ph ph-briefcase"></i> New Jobs Matching You</h2>
       <div id="matchJobs" class="dashboard-grid" style="margin-top:10px"></div>
     </section>
 
@@ -48,13 +48,13 @@
         <img class="preview-photo" style="display:block" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=60" alt="Ramesh">
         <div>
           <h3>Ramesh Kumar</h3>
-          <p>⚡ Electrician · Delhi</p>
-          <p>⭐ 4.9 · 47 reviews</p>
+          <p><i class="ph ph-flashlight"></i> Electrician · Delhi</p>
+          <p><i class="ph ph-star"></i> 4.9 · 47 reviews</p>
         </div>
-        <a href="register.html" class="btn btn-outline touch-target">✏️ Edit</a>
+        <a href="register.html" class="btn btn-outline touch-target"><i class="ph ph-pencil-simple"></i> Edit</a>
       </div>
       <div style="margin-top:10px">
-        <p>My Work: ⚡ Electrician</p>
+        <p>My Work: <i class="ph ph-flashlight"></i> Electrician</p>
         <p>Daily Rate: ₹600/day</p>
         <p>Experience: 8 years</p>
         <p>City: Delhi</p>
@@ -66,7 +66,7 @@
   </main>
 
   <nav class="bottom-nav">
-    <a href="worker-dashboard.html" class="bottom-tab active"><i class="ph-fill ph-house"></i><span>Home</span></a>
+    <a href="worker-dashboard.html" class="bottom-tab active"><i class="ph ph-house"></i><span>Home</span></a>
     <a href="search.html" class="bottom-tab"><i class="ph ph-magnifying-glass"></i><span>Search</span></a>
     <a href="worker-dashboard.html" class="bottom-tab"><i class="ph ph-briefcase"></i><span>Jobs</span></a>
     <a href="worker-profile.html" class="bottom-tab"><i class="ph ph-user"></i><span>Profile</span></a>
@@ -87,7 +87,7 @@
 
     document.getElementById("matchJobs").innerHTML = matches.map(renderJobCard).join("");
     document.getElementById("appliedJobs").innerHTML = applied.map((job) => {
-      const call = job.status === "accepted" ? `<a class="btn btn-primary touch-target" href="tel:9876543210" style="margin-top:10px">📞 Call Employer: 9876XXXXXX</a>` : "";
+      const call = job.status === "accepted" ? `<a class="btn btn-primary touch-target" href="tel:9876543210" style="margin-top:10px"><i class="ph ph-phone"></i> Call Employer: 9876XXXXXX</a>` : "";
       return `<article class="card"><span class="badge ${job.status}">${job.status.toUpperCase()}</span><h3 style="margin-top:6px">${job.title}</h3><p>${job.location} · ₹${job.rate}/day</p><p>Applied 2 days ago</p>${call}</article>`;
     }).join("");
 
@@ -95,7 +95,7 @@
     const text = document.getElementById("availabilityText");
     toggle.addEventListener("click", () => {
       const active = toggle.classList.toggle("active");
-      text.textContent = active ? "🟢 AVAILABLE" : "🔴 BUSY";
+      text.innerHTML = active ? '<i class="ph ph-circle-fill"></i> AVAILABLE' : '<i class="ph ph-circle-fill"></i> BUSY';
       text.style.color = active ? "var(--success)" : "var(--danger)";
       showToast(active ? "You are now available" : "You are now busy", "success");
     });

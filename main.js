@@ -1,18 +1,18 @@
 import { applyTranslations, setupLanguageSwitcher, maybeShowLanguageHint, getCurrentLanguage, loadLocale } from "./i18n.js";
 
 const categoryMeta = {
-  electrician: { emoji: "⚡", label: "Electrician", color: "#FEF3C7", accent: "#CA8A04" },
-  plumber: { emoji: "🔧", label: "Plumber", color: "#DBEAFE", accent: "#1D4ED8" },
-  carpenter: { emoji: "🪚", label: "Carpenter", color: "#FDE68A", accent: "#92400E" },
-  maid: { emoji: "🧹", label: "Maid", color: "#EDE9FE", accent: "#6D28D9" },
-  mechanic: { emoji: "🔩", label: "Mechanic", color: "#E7E5E4", accent: "#57534E" },
-  painter: { emoji: "🎨", label: "Painter", color: "#FCE7F3", accent: "#BE185D" },
-  mason: { emoji: "🧱", label: "Mason", color: "#FFEDD5", accent: "#C2410C" },
-  driver: { emoji: "🚗", label: "Driver", color: "#DCFCE7", accent: "#15803D" },
-  cook: { emoji: "🍳", label: "Cook", color: "#FEE2E2", accent: "#B91C1C" },
-  welder: { emoji: "🔥", label: "Welder", color: "#D6D3D1", accent: "#1C1917" },
-  labour: { emoji: "🏗", label: "Labour", color: "#FAE8D4", accent: "#A16207" },
-  other: { emoji: "🧰", label: "Other", color: "#F5F5F4", accent: "#44403C" }
+  electrician: { icon: "ph ph-flashlight", label: "Electrician", color: "#FEF3C7", accent: "#CA8A04" },
+  plumber: { icon: "ph ph-wrench", label: "Plumber", color: "#DBEAFE", accent: "#1D4ED8" },
+  carpenter: { icon: "ph ph-hammer", label: "Carpenter", color: "#FDE68A", accent: "#92400E" },
+  maid: { icon: "ph ph-broom", label: "Maid", color: "#EDE9FE", accent: "#6D28D9" },
+  mechanic: { icon: "ph ph-gear-six", label: "Mechanic", color: "#E7E5E4", accent: "#57534E" },
+  painter: { icon: "ph ph-paint-brush", label: "Painter", color: "#FCE7F3", accent: "#BE185D" },
+  mason: { icon: "ph ph-buildings", label: "Mason", color: "#FFEDD5", accent: "#C2410C" },
+  driver: { icon: "ph ph-car", label: "Driver", color: "#DCFCE7", accent: "#15803D" },
+  cook: { icon: "ph ph-fork-knife", label: "Cook", color: "#FEE2E2", accent: "#B91C1C" },
+  welder: { icon: "ph ph-fire", label: "Welder", color: "#D6D3D1", accent: "#1C1917" },
+  labour: { icon: "ph ph-hard-hat", label: "Labour", color: "#FAE8D4", accent: "#A16207" },
+  other: { icon: "ph ph-toolbox", label: "Other", color: "#F5F5F4", accent: "#44403C" }
 };
 
 function formatCurrency(value) {
@@ -62,12 +62,12 @@ function showToast(message, type = "success") {
   toast.className = `toast toast-${type}`;
 
   const iconMap = {
-    success: "✅",
-    error: "❌",
-    warning: "⚠️"
+    success: "ph ph-check-circle",
+    error: "ph ph-x-circle",
+    warning: "ph ph-warning-circle"
   };
 
-  toast.innerHTML = `<span>${iconMap[type] || "ℹ️"}</span><span>${message}</span>`;
+  toast.innerHTML = `<i class="${iconMap[type] || "ph ph-info"}"></i><span>${message}</span>`;
   root.appendChild(toast);
 
   window.setTimeout(() => {
@@ -96,13 +96,13 @@ function hideLoading() {
   }
 }
 
-function showEmptyState({ container, emoji = "😔", title = "No data", message = "Try again", buttonText, onAction }) {
+function showEmptyState({ container, iconClass = "ph ph-smiley-sad", title = "No data", message = "Try again", buttonText, onAction }) {
   if (!container) {
     return;
   }
   container.innerHTML = `
     <div class="empty-state card">
-      <div class="empty-emoji">${emoji}</div>
+      <div class="empty-emoji"><i class="${iconClass}"></i></div>
       <h3>${title}</h3>
       <p>${message}</p>
       ${buttonText ? `<button class="btn btn-primary touch-target" data-empty-action>${buttonText}</button>` : ""}
@@ -119,7 +119,7 @@ function showError({ container, message = "Something went wrong. Please try agai
   }
   container.innerHTML = `
     <div class="error-state card">
-      <div class="empty-emoji">📶</div>
+      <div class="empty-emoji"><i class="ph ph-wifi-x"></i></div>
       <h3>Oops!</h3>
       <p>${message}</p>
       <button class="btn btn-outline touch-target" data-error-retry>${retryText}</button>
@@ -146,14 +146,14 @@ function renderWorkerCard(worker) {
             <h4>${worker.name}</h4>
             <span class="status-pill ${statusClass}"><span class="status-dot ${statusClass}"></span>${statusLabel}</span>
           </div>
-          <p>${category.emoji} ${category.label} · ${worker.distance ? `📍 ${worker.distance} km away` : worker.city}</p>
-          <p>⭐ ${worker.rating} (${worker.reviews} reviews)</p>
-          <p>💰 ${formatCurrency(worker.rate)}/day · ${worker.experience} years experience</p>
+          <p><i class="${category.icon}"></i> ${category.label} · ${worker.distance ? `<i class="ph ph-map-pin"></i> ${worker.distance} km away` : worker.city}</p>
+          <p><i class="ph ph-star"></i> ${worker.rating} (${worker.reviews} reviews)</p>
+          <p><i class="ph ph-currency-inr"></i> ${formatCurrency(worker.rate)}/day · ${worker.experience} years experience</p>
         </div>
       </div>
       <div class="worker-actions">
-        <a href="tel:${worker.phone || ""}" class="btn btn-primary touch-target">📞 Contact</a>
-        <a href="worker-profile.html?id=${worker.id}" class="btn btn-outline touch-target">👁 View Profile</a>
+        <a href="tel:${worker.phone || ""}" class="btn btn-primary touch-target"><i class="ph ph-phone"></i> Contact</a>
+        <a href="worker-profile.html?id=${worker.id}" class="btn btn-outline touch-target"><i class="ph ph-eye"></i> View Profile</a>
       </div>
     </article>
   `;
@@ -166,11 +166,11 @@ function renderJobCard(job) {
         <h4>${job.title}</h4>
         <span class="badge ${job.status || "pending"}">${String(job.status || "pending").toUpperCase()}</span>
       </div>
-      <p>${job.location} · ${formatCurrency(job.rate)}/day</p>
-      <p>${job.duration} · Posted ${getRelativeDateLabel(job.createdAt)}</p>
+      <p><i class="ph ph-map-pin"></i> ${job.location} · ${formatCurrency(job.rate)}/day</p>
+      <p><i class="ph ph-clock"></i> ${job.duration} · Posted ${getRelativeDateLabel(job.createdAt)}</p>
       <div class="worker-actions">
-        <button class="btn btn-outline touch-target" data-job-view="${job.id}">👁 View</button>
-        <button class="btn btn-primary touch-target" data-job-apply="${job.id}">🚀 Apply</button>
+        <button class="btn btn-outline touch-target" data-job-view="${job.id}"><i class="ph ph-eye"></i> View</button>
+        <button class="btn btn-primary touch-target" data-job-apply="${job.id}"><i class="ph ph-paper-plane-tilt"></i> Apply</button>
       </div>
     </article>
   `;
@@ -347,7 +347,7 @@ function showSuccessOverlay(message = "Success!") {
   overlay.className = "success-overlay";
   overlay.innerHTML = `
     <div class="success-card">
-      <div class="checkmark">✅</div>
+      <div class="checkmark"><i class="ph ph-check-circle"></i></div>
       <h3>${message}</h3>
       <p>You are all set.</p>
     </div>

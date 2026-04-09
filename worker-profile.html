@@ -13,24 +13,24 @@
 <body>
   <main class="container section">
     <div class="top-bar">
-      <button class="btn btn-outline touch-target" onclick="history.back()">← Back</button>
+      <button class="btn btn-outline touch-target" onclick="history.back()"><i class="ph ph-arrow-left"></i> Back</button>
       <div></div>
-      <button class="btn btn-outline touch-target" id="shareBtn">Share 🔗</button>
+      <button class="btn btn-outline touch-target" id="shareBtn"><i class="ph ph-share-network"></i> Share</button>
     </div>
 
     <section class="card profile-hero">
       <img class="profile-avatar" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=220&q=60" alt="Ramesh Kumar">
       <h1>Ramesh Kumar</h1>
-      <p>⚡ Electrician</p>
-      <p>📍 Lajpat Nagar, DL</p>
-      <p style="color:var(--success)">🟢 Available Now</p>
-      <p>⭐⭐⭐⭐⭐ 4.9 (47 reviews)</p>
+      <p><i class="ph ph-flashlight"></i> Electrician</p>
+      <p><i class="ph ph-map-pin"></i> Lajpat Nagar, DL</p>
+      <p style="color:var(--success)"><i class="ph ph-circle-fill"></i> Available Now</p>
+      <p><i class="ph ph-star"></i> 4.9 (47 reviews)</p>
     </section>
 
     <section class="card" style="margin-top:12px">
-      <p>💰 ₹600 per day</p>
-      <p>🏆 8 years experience</p>
-      <p>🗣 Hindi, English</p>
+      <p><i class="ph ph-currency-inr"></i> ₹600 per day</p>
+      <p><i class="ph ph-trophy"></i> 8 years experience</p>
+      <p><i class="ph ph-chat-circle-text"></i> Hindi, English</p>
     </section>
 
     <section class="card" style="margin-top:12px">
@@ -52,17 +52,17 @@
     <section class="card" style="margin-top:12px">
       <h2>Reviews (47)</h2>
       <article class="card" style="margin-top:8px">
-        <p>⭐⭐⭐⭐⭐ Sharma Family · 2 days ago</p>
+        <p><i class="ph ph-star"></i> Sharma Family · 2 days ago</p>
         <p>Very good work and on time.</p>
       </article>
       <article class="card" style="margin-top:8px">
-        <p>⭐⭐⭐⭐⭐ Gupta Home · 4 days ago</p>
+        <p><i class="ph ph-star"></i> Gupta Home · 4 days ago</p>
         <p>Clean work and friendly behavior.</p>
       </article>
     </section>
 
     <div class="sticky-action">
-      <button class="btn btn-primary touch-target" id="hireBtn" style="width:100%">🤝 Hire Ramesh Kumar</button>
+      <button class="btn btn-primary touch-target" id="hireBtn" style="width:100%"><i class="ph ph-handshake"></i> Hire Ramesh Kumar</button>
     </div>
   </main>
 
@@ -80,7 +80,7 @@
     });
 
     document.getElementById("hireBtn").addEventListener("click", () => {
-      showSuccessOverlay("✅ Request Sent!");
+      showSuccessOverlay("Request Sent!");
       showToast("Worker will contact you soon.", "success");
     });
 
