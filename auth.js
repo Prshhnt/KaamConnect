@@ -5,7 +5,7 @@ function normalizePhone(phone) {
 }
 
 function phoneToPseudoEmail(phone) {
-  return `${normalizePhone(phone)}@dailywork.local`;
+  return `${normalizePhone(phone)}@kaamconnect.local`;
 }
 
 function validatePhone(phone) {

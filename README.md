@@ -1,6 +1,6 @@
-# DailyWork Connect
+# KaamConnect
 
-DailyWork Connect is a simple, mobile-first job board for daily wage workers and small employers.
+KaamConnect is a simple, mobile-first job board for daily wage workers and small employers.
 It is built with HTML5, CSS3, and Vanilla JavaScript, with Appwrite as backend.
 
 ## Tech Stack
