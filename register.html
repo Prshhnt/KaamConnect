@@ -176,7 +176,7 @@
       button.type = "button";
       button.className = "category-card touch-target";
       button.style.background = value.color;
-      button.innerHTML = `<span class="emoji">${value.emoji}</span><span>${value.label}</span>`;
+      button.innerHTML = `<span class="emoji"><i class="${value.icon}"></i></span><span>${value.label}</span>`;
       button.addEventListener("click", () => {
         selectedWorkType = key;
         [...workTypeGrid.children].forEach((node) => node.style.borderColor = "transparent");

@@ -113,14 +113,6 @@
     </section>
 
     <section class="section" style="padding-top:0">
-      <div class="container">
-        <h2 data-i18n="index.featuredTitle">Top Rated Workers Near You</h2>
-        <div id="featuredWorkers" class="worker-carousel" style="margin-top:14px"></div>
-        <div id="featuredDots" class="carousel-dots"></div>
-      </div>
-    </section>
-
-    <section class="section" style="padding-top:0">
       <div class="container split-cta">
         <article class="card">
           <h3 data-i18n="index.ctaWorker">Are you a worker?</h3>
@@ -137,11 +129,9 @@
   </main>
 
   <script type="module">
-    import { initCommonUI, categoryMeta, renderWorkerCard, renderSkeletonCards, requestCityFromLocation, showToast } from "./main.js";
+    import { initCommonUI, categoryMeta, requestCityFromLocation, showToast } from "./main.js";
 
     const categoryGrid = document.getElementById("categoryGrid");
-    const featuredWorkers = document.getElementById("featuredWorkers");
-    const featuredDots = document.getElementById("featuredDots");
 
     const categories = Object.entries(categoryMeta);
     categories.forEach(([key, meta]) => {
@@ -184,24 +174,6 @@
     });
 
     renderSteps("worker");
-
-    const mockWorkers = [
-      { id: "w1", name: "Ramesh", category: "electrician", rating: 4.9, reviews: 47, rate: 600, experience: 8, distance: 2.3, city: "Delhi", available: true, phone: "9876543210" },
-      { id: "w2", name: "Sunita", category: "maid", rating: 4.8, reviews: 35, rate: 400, experience: 6, distance: 3.1, city: "Mumbai", available: true, phone: "9876500000" },
-      { id: "w3", name: "Raju", category: "plumber", rating: 4.7, reviews: 29, rate: 700, experience: 9, distance: 1.4, city: "Pune", available: false, phone: "9876511111" }
-    ];
-
-    renderSkeletonCards(featuredWorkers, 3);
-    setTimeout(() => {
-      featuredWorkers.innerHTML = mockWorkers.map(renderWorkerCard).join("");
-      featuredDots.innerHTML = mockWorkers.map((_, idx) => `<span class="carousel-dot ${idx === 0 ? "active" : ""}"></span>`).join("");
-    }, 500);
-
-    featuredWorkers.addEventListener("scroll", () => {
-      const cardWidth = featuredWorkers.firstElementChild?.getBoundingClientRect().width || 1;
-      const index = Math.round(featuredWorkers.scrollLeft / (cardWidth + 14));
-      [...featuredDots.children].forEach((dot, idx) => dot.classList.toggle("active", idx === index));
-    });
 
     document.getElementById("heroLocationBtn").addEventListener("click", async () => {
       const city = await requestCityFromLocation();
