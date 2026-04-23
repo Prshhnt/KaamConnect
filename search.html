@@ -83,6 +83,7 @@
 
   <script type="module">
     import { initCommonUI, categoryMeta, renderWorkerCard, renderJobCard, renderSkeletonCards, showEmptyState, showToast, initBottomSheet, requestCityFromLocation, showSuccessOverlay } from "./main.js";
+    import { fetchWorkers, fetchJobs, createApplication } from "./appwrite.js";
 
     const resultsNode = document.getElementById("results");
     const locationBanner = document.getElementById("locationBanner");
@@ -100,17 +101,8 @@
       city: new URLSearchParams(location.search).get("city") || ""
     };
 
-    const workers = [
-      { id: "w1", name: "Ramesh Kumar", category: "electrician", rating: 4.9, reviews: 47, rate: 600, experience: 8, distance: 2.3, city: "Lajpat Nagar", available: true, phone: "9876543210" },
-      { id: "w2", name: "Sunita Devi", category: "maid", rating: 4.8, reviews: 34, rate: 400, experience: 6, distance: 4.2, city: "Karol Bagh", available: true, phone: "9876543201" },
-      { id: "w3", name: "Raju Yadav", category: "plumber", rating: 4.1, reviews: 19, rate: 700, experience: 9, distance: 6.1, city: "Saket", available: false, phone: "9876543202" },
-      { id: "w4", name: "Amit Sharma", category: "carpenter", rating: 4.6, reviews: 26, rate: 900, experience: 10, distance: 8.8, city: "Rohini", available: true, phone: "9876543203" }
-    ];
-
-    const jobs = [
-      { id: "j1", title: "Electrician Needed", location: "Lajpat Nagar", rate: 700, duration: "1 week", status: "open", createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-      { id: "j2", title: "House Cleaning Work", location: "Dwarka", rate: 500, duration: "2-3 days", status: "pending", createdAt: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString() }
-    ];
+    let workers = [];
+    let jobs = [];
 
     function buildCategoryChips() {
       categoryChips.innerHTML = Object.entries(categoryMeta).map(([key, value]) => {
@@ -166,17 +158,64 @@
           applyFiltersBtn.textContent = `Show ${jobs.length} Results`;
           resultsNode.innerHTML = jobs.map(renderJobCard).join("");
           resultsNode.querySelectorAll("[data-job-apply]").forEach((button) => {
-            button.addEventListener("click", () => {
-              showSuccessOverlay("Applied Successfully!");
-              showToast("Application sent to employer", "success");
+            button.addEventListener("click", async () => {
+              const jobId = button.getAttribute("data-job-apply");
+              const currentUser = await getCurrentUser();
+              if (!currentUser) {
+                showToast("Please login to apply", "warning");
+                return;
+              }
+              const result = await createApplication(jobId, currentUser.$id);
+              if (result) {
+                showSuccessOverlay("Applied Successfully!");
+                showToast("Application sent to employer", "success");
+              } else {
+                showToast("Failed to apply. Try again.", "error");
+              }
             });
           });
         }
       }, 420);
     }
 
-    buildCategoryChips();
-    renderResults();
+    async function loadData() {
+      renderSkeletonCards(resultsNode, 3);
+      try {
+        // Fetch workers and jobs from database
+        workers = await fetchWorkers({ city: state.city });
+        jobs = await fetchJobs({ city: state.city });
+        
+        if (!workers.length && !jobs.length) {
+          showEmptyState({
+            container: resultsNode,
+            title: "No data available yet",
+            message: "Workers and jobs will appear here soon",
+            iconClass: "ph ph-briefcase"
+          });
+          return;
+        }
+        
+        renderResults();
+      } catch (error) {
+        console.error("Failed to load data:", error);
+        showEmptyState({
+          container: resultsNode,
+          title: "Error loading data",
+          message: "Please check your connection",
+          buttonText: "Retry",
+          onAction: loadData
+        });
+      }
+    }
+
+    async function getCurrentUser() {
+      try {
+        const { account } = await import("./appwrite.js");
+        return await account.get();
+      } catch {
+        return null;
+      }
+    }
 
     categoryChips.addEventListener("click", (event) => {
       const chip = event.target.closest("[data-chip]");
@@ -278,6 +317,9 @@
       showToast(`Searching near ${city}`, "success");
     });
 
+    // Initialize
+    buildCategoryChips();
+    loadData();
     initBottomSheet("#filterBtn", "#filterSheet", "#closeFilterBtn");
     initCommonUI();
   </script>

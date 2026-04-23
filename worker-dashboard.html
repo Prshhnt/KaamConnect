@@ -73,23 +73,72 @@
   </nav>
 
   <script type="module">
-    import { initCommonUI, renderJobCard, showToast, setupPullToRefresh } from "./main.js";
+    import { initCommonUI, renderJobCard, showToast, setupPullToRefresh, showEmptyState, renderSkeletonCards } from "./main.js";
+    import { fetchJobs, account } from "./appwrite.js";
 
-    const matches = [
-      { id: "m1", title: "Electrician needed", location: "Lajpat Nagar", rate: 700, duration: "1 week", status: "open", createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-      { id: "m2", title: "Switchboard repair", location: "South Ex", rate: 650, duration: "2 days", status: "open", createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() }
-    ];
+    let matches = [];
+    let applied = [];
 
-    const applied = [
-      { id: "a1", title: "Electrician — Sharma House", location: "Lajpat Nagar", rate: 700, duration: "1 week", status: "pending", createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-      { id: "a2", title: "Plumbing Work — Mehta Home", location: "Connaught Place", rate: 500, duration: "2 days", status: "accepted", createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() }
-    ];
+    const matchJobsNode = document.getElementById("matchJobs");
+    const appliedJobsNode = document.getElementById("appliedJobs");
 
-    document.getElementById("matchJobs").innerHTML = matches.map(renderJobCard).join("");
-    document.getElementById("appliedJobs").innerHTML = applied.map((job) => {
-      const call = job.status === "accepted" ? `<a class="btn btn-primary touch-target" href="tel:9876543210" style="margin-top:10px"><i class="ph ph-phone"></i> Call Employer: 9876XXXXXX</a>` : "";
-      return `<article class="card"><span class="badge ${job.status}">${job.status.toUpperCase()}</span><h3 style="margin-top:6px">${job.title}</h3><p>${job.location} · ₹${job.rate}/day</p><p>Applied 2 days ago</p>${call}</article>`;
-    }).join("");
+    async function loadJobs() {
+      try {
+        renderSkeletonCards(matchJobsNode, 2);
+        
+        // Get current user
+        const user = await account.get();
+        
+        // Fetch jobs that match this worker
+        matches = await fetchJobs({ status: "open" });
+        
+        // Fetch applied jobs (in real app, would query applications collection)
+        applied = [];
+        
+        renderMatchingJobs();
+        renderAppliedJobs();
+      } catch (error) {
+        console.error("Failed to load jobs:", error);
+        showEmptyState({
+          container: matchJobsNode,
+          title: "Unable to load jobs",
+          message: "Please check your connection"
+        });
+      }
+    }
+
+    function renderMatchingJobs() {
+      if (!matches.length) {
+        showEmptyState({
+          container: matchJobsNode,
+          title: "No matching jobs",
+          message: "Check back soon for new opportunities",
+          iconClass: "ph ph-briefcase"
+        });
+        return;
+      }
+      matchJobsNode.innerHTML = matches.map(renderJobCard).join("");
+    }
+
+    function renderAppliedJobs() {
+      if (!applied.length) {
+        appliedJobsNode.innerHTML = '<article class="card"><p style="text-align:center;color:#999">No applications yet</p></article>';
+        return;
+      }
+      appliedJobsNode.innerHTML = applied.map((job) => {
+        const call = job.status === "accepted" ? `<a class="btn btn-primary touch-target" href="tel:${job.employerPhone || "9876543210"}" style="margin-top:10px"><i class="ph ph-phone"></i> Call Employer</a>` : "";
+        return `<article class="card"><span class="badge ${job.status}">${job.status.toUpperCase()}</span><h3 style="margin-top:6px">${job.title}</h3><p>${job.location} · ₹${job.rate}/day</p><p>Applied ${getRelativeTime(job.appliedAt)}</p>${call}</article>`;
+      }).join("");
+    }
+
+    function getRelativeTime(isoDate) {
+      const ms = Date.now() - new Date(isoDate).getTime();
+      const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+      if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+      const hours = Math.floor(ms / (60 * 60 * 1000));
+      if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      return 'just now';
+    }
 
     const toggle = document.getElementById("availabilityToggle");
     const text = document.getElementById("availabilityText");
@@ -105,6 +154,8 @@
       window.location.reload();
     });
 
+    // Load jobs on page load
+    loadJobs();
     initCommonUI();
   </script>
 </body>

@@ -91,64 +91,111 @@
   </nav>
 
   <script type="module">
-    import { initCommonUI, categoryMeta, initBottomSheet, showToast, showSuccessOverlay } from "./main.js";
+    import { initCommonUI, categoryMeta, initBottomSheet, showToast, showSuccessOverlay, showEmptyState, renderSkeletonCards } from "./main.js";
+    import { fetchJobs, account } from "./appwrite.js";
 
-    const postedJobs = [
-      { title: "Electrician", status: "open", text: "3 people applied · Posted 1 day ago" },
-      { title: "Maid", status: "open", text: "2 people applied · Posted 3 days ago" }
-    ];
+    let postedJobs = [];
+    let applicants = [];
 
-    document.getElementById("postedJobs").innerHTML = postedJobs.map((job) => `
-      <article class="card">
-        <h3>${job.title} · <span class="badge ${job.status}">${job.status.toUpperCase()}</span></h3>
-        <p>${job.text}</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-          <button class="btn btn-outline touch-target">See Applicants</button>
-          <button class="btn btn-outline touch-target" data-close-job>Close Job</button>
-        </div>
-      </article>
-    `).join("");
+    const postedJobsNode = document.getElementById("postedJobs");
+    const applicantsListNode = document.getElementById("applicantsList");
 
-    document.querySelectorAll("[data-close-job]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const yes = confirm("Are you sure you want to close this job?");
-        if (yes) {
-          showToast("Job closed", "success");
-        }
+    async function loadEmployerData() {
+      try {
+        const user = await account.get();
+        
+        // Fetch jobs posted by this employer
+        postedJobs = await fetchJobs({ employerId: user.$id });
+        
+        renderPostedJobs();
+        renderApplicants();
+      } catch (error) {
+        console.error("Failed to load employer data:", error);
+        showEmptyState({
+          container: postedJobsNode,
+          title: "Unable to load jobs",
+          message: "Please check your connection"
+        });
+      }
+    }
+
+    function renderPostedJobs() {
+      if (!postedJobs.length) {
+        showEmptyState({
+          container: postedJobsNode,
+          title: "No jobs posted yet",
+          message: "Click 'Post a New Job' to get started",
+          buttonText: "Post a Job",
+          onAction: () => document.getElementById("postJobBtn").click()
+        });
+        return;
+      }
+
+      postedJobsNode.innerHTML = postedJobs.map((job, index) => `
+        <article class="card">
+          <h3>${job.title} · <span class="badge ${job.status || 'open'}">${(job.status || 'open').toUpperCase()}</span></h3>
+          <p>${job.applicationsCount || 0} people applied · Posted ${getRelativeTime(job.createdAt)}</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+            <button class="btn btn-outline touch-target" data-view-job="${index}">See Applicants</button>
+            <button class="btn btn-outline touch-target" data-close-job="${index}">Close Job</button>
+          </div>
+        </article>
+      `).join("");
+
+      document.querySelectorAll("[data-close-job]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = button.getAttribute("data-close-job");
+          const yes = confirm("Are you sure you want to close this job?");
+          if (yes) {
+            showToast("Job closed", "success");
+            // TODO: Update job status in database
+          }
+        });
       });
-    });
+    }
 
-    const applicants = [
-      { name: "Ramesh Kumar", rating: 4.9, reviews: 47, exp: 8, rate: 600, distance: 2.3 },
-      { name: "Shamim Ali", rating: 4.6, reviews: 21, exp: 6, rate: 550, distance: 4.9 }
-    ];
+    function renderApplicants() {
+      if (!applicants.length) {
+        applicantsListNode.innerHTML = '<article class="card"><p style="text-align:center;color:#999">No applicants yet</p></article>';
+        return;
+      }
 
-    document.getElementById("applicantsList").innerHTML = applicants.map((item, index) => `
-      <article class="card">
-        <h3>${item.name}</h3>
-        <p><i class="ph ph-star"></i> ${item.rating} · ${item.reviews} reviews</p>
-        <p>${item.exp} years · ₹${item.rate}/day · <i class="ph ph-map-pin"></i> ${item.distance} km away</p>
-        <div style="display:grid;gap:8px;margin-top:10px">
-          <button class="btn btn-outline touch-target"><i class="ph ph-eye"></i> View Profile</button>
-          <button class="btn btn-primary touch-target" data-accept="${index}"><i class="ph ph-check-circle"></i> Accept & Get Number</button>
-          <button class="btn btn-outline touch-target"><i class="ph ph-x-circle"></i> Reject</button>
-          <a href="tel:9876543210" class="btn btn-primary touch-target" data-call="${index}" style="display:none"><i class="ph ph-phone"></i> Call Now</a>
-        </div>
-      </article>
-    `).join("");
+      applicantsListNode.innerHTML = applicants.map((item, index) => `
+        <article class="card">
+          <h3>${item.name}</h3>
+          <p><i class="ph ph-star"></i> ${item.rating} · ${item.reviews} reviews</p>
+          <p>${item.experience || item.exp} years · ₹${item.rate}/day · <i class="ph ph-map-pin"></i> ${item.distance || 0} km away</p>
+          <div style="display:grid;gap:8px;margin-top:10px">
+            <button class="btn btn-outline touch-target"><i class="ph ph-eye"></i> View Profile</button>
+            <button class="btn btn-primary touch-target" data-accept="${index}"><i class="ph ph-check-circle"></i> Accept & Get Number</button>
+            <button class="btn btn-outline touch-target"><i class="ph ph-x-circle"></i> Reject</button>
+            <a href="tel:${item.phone || "9876543210"}" class="btn btn-primary touch-target" data-call="${index}" style="display:none"><i class="ph ph-phone"></i> Call Now</a>
+          </div>
+        </article>
+      `).join("");
 
-    document.querySelectorAll("[data-accept]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const id = button.getAttribute("data-accept");
-        const callButton = document.querySelector(`[data-call='${id}']`);
-        if (callButton) {
-          callButton.style.display = "inline-flex";
-        }
-        button.innerHTML = '<i class="ph ph-check-circle"></i> Accepted';
-        button.disabled = true;
-        showToast("Worker accepted. Phone unlocked.", "success");
+      document.querySelectorAll("[data-accept]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.getAttribute("data-accept");
+          const callButton = document.querySelector(`[data-call='${id}']`);
+          if (callButton) {
+            callButton.style.display = "inline-flex";
+          }
+          button.innerHTML = '<i class="ph ph-check-circle"></i> Accepted';
+          button.disabled = true;
+          showToast("Worker accepted. Phone unlocked.", "success");
+        });
       });
-    });
+    }
+
+    function getRelativeTime(isoDate) {
+      const ms = Date.now() - new Date(isoDate).getTime();
+      const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+      if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+      const hours = Math.floor(ms / (60 * 60 * 1000));
+      if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      return 'just now';
+    }
 
     const jobCategoryGrid = document.getElementById("jobCategoryGrid");
     let selectedCategory = "";
@@ -210,6 +257,8 @@
       document.getElementById("postJobSheet").classList.remove("open");
     });
 
+    // Load employer data
+    loadEmployerData();
     initBottomSheet("#postJobBtn", "#postJobSheet", "#closePostSheet");
     initCommonUI();
   </script>

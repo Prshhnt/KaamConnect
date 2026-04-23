@@ -20,7 +20,7 @@ function validatePassword(password) {
     return "Please enter your password";
   }
   if (password.length < 6) {
-    return "Password should be at least 6 characters";
+    return `Password too short (${password.length}/6 chars minimum)`;
   }
   return "";
 }
@@ -35,6 +35,20 @@ function validateName(name) {
 function validateCity(city) {
   if (!city || city.trim().length < 2) {
     return "Please enter your city";
+  }
+  return "";
+}
+
+function validateDailyRate(rate) {
+  const r = Number(rate || 0);
+  if (!r) {
+    return "Please set a daily rate";
+  }
+  if (r < 100) {
+    return `Rate too low (minimum ₹100, you set ₹${r})`;
+  }
+  if (r > 10000) {
+    return "Rate seems too high (max ₹10,000)";
   }
   return "";
 }
@@ -61,12 +75,7 @@ function validateRegisterForm(payload) {
     } else {
       errors.workType = "";
     }
-    const rate = Number(payload.dailyRate || 0);
-    if (!rate || rate < 100) {
-      errors.dailyRate = "Please choose your daily rate";
-    } else {
-      errors.dailyRate = "";
-    }
+    errors.dailyRate = validateDailyRate(payload.dailyRate);
   }
 
   return errors;
@@ -74,6 +83,19 @@ function validateRegisterForm(payload) {
 
 function hasErrors(errorMap) {
   return Object.values(errorMap).some(Boolean);
+}
+
+function logAuthError(action, error, context = {}) {
+  const safeError = {
+    message: error?.message || "Unknown Appwrite error",
+    code: error?.code,
+    type: error?.type,
+    response: error?.response
+  };
+  console.error(`[Auth:${action}]`, {
+    ...context,
+    error: safeError
+  });
 }
 
 async function loginWithEmailPassword(email, password) {
@@ -86,6 +108,7 @@ async function loginWithEmailPassword(email, password) {
     const session = await account.createEmailPasswordSession(normalizeEmail(email), password);
     return { ok: true, session, errors: {} };
   } catch (error) {
+    logAuthError("loginWithEmailPassword", error, { email: normalizeEmail(email) });
     return {
       ok: false,
       errors: {
@@ -112,11 +135,23 @@ async function registerUser(payload) {
     try {
       await account.createEmailPasswordSession(email, payload.password);
     } catch (sessionError) {
-      console.warn("Session creation failed after registration", sessionError);
+      console.warn("Session creation failed after registration", {
+        email,
+        message: sessionError?.message,
+        code: sessionError?.code,
+        type: sessionError?.type,
+        response: sessionError?.response
+      });
     }
 
     return { ok: true, user, errors: {} };
   } catch (error) {
+    logAuthError("registerUser", error, {
+      email,
+      role: payload.role,
+      city: payload.city,
+      workType: payload.workType || null
+    });
     const message = String(error?.message || "").toLowerCase();
     const duplicate = message.includes("already") || message.includes("exist");
     return {
@@ -130,8 +165,13 @@ async function registerUser(payload) {
 }
 
 async function loginWithGoogle(successUrl, failureUrl) {
-  const session = await account.createOAuth2Session("google", successUrl, failureUrl);
-  return session;
+  try {
+    const session = await account.createOAuth2Session("google", successUrl, failureUrl);
+    return session;
+  } catch (error) {
+    logAuthError("loginWithGoogle", error, { successUrl, failureUrl });
+    throw error;
+  }
 }
 
 async function getCurrentUser() {

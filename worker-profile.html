@@ -67,7 +67,74 @@
   </main>
 
   <script type="module">
-    import { initCommonUI, showToast, showSuccessOverlay } from "./main.js";
+    import { initCommonUI, showToast, showSuccessOverlay, categoryMeta, showEmptyState } from "./main.js";
+    import { fetchWorkerById, fetchReviewsForWorker, createApplication } from "./appwrite.js";
+
+    const workerId = new URLSearchParams(location.search).get("id");
+    let currentWorker = null;
+    let reviews = [];
+
+    async function loadWorkerProfile() {
+      try {
+        if (!workerId) {
+          showEmptyState({
+            container: document.body,
+            title: "Worker not found",
+            message: "Invalid worker ID"
+          });
+          return;
+        }
+
+        currentWorker = await fetchWorkerById(workerId);
+        if (!currentWorker) {
+          showEmptyState({
+            container: document.body,
+            title: "Worker not found",
+            message: "This worker profile is no longer available"
+          });
+          return;
+        }
+
+        reviews = await fetchReviewsForWorker(workerId);
+        renderProfile();
+      } catch (error) {
+        console.error("Failed to load profile:", error);
+        showEmptyState({
+          container: document.body,
+          title: "Error loading profile",
+          message: "Please check your connection"
+        });
+      }
+    }
+
+    function renderProfile() {
+      const category = categoryMeta[currentWorker.category] || categoryMeta.other;
+      
+      // Update profile hero section
+      document.querySelector(".profile-avatar").src = currentWorker.photo || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=220&q=60";
+      document.querySelector(".profile-avatar").alt = currentWorker.name;
+      
+      const profileHero = document.querySelector(".profile-hero");
+      profileHero.innerHTML = `
+        <img class="profile-avatar" src="${currentWorker.photo || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=220&q=60"}" alt="${currentWorker.name}">
+        <h1>${currentWorker.name}</h1>
+        <p><i class="${category.icon}"></i> ${category.label}</p>
+        <p><i class="ph ph-map-pin"></i> ${currentWorker.city}</p>
+        <p style="color:${currentWorker.available ? 'var(--success)' : 'var(--danger)'}"><i class="ph ph-circle-fill"></i> ${currentWorker.available ? 'Available Now' : 'Busy'}</p>
+        <p><i class="ph ph-star"></i> ${currentWorker.rating || 0} (${currentWorker.reviewsCount || reviews.length} reviews)</p>
+      `;
+
+      // Update details section
+      document.querySelectorAll(".profile-hero")[0].nextElementSibling.innerHTML = `
+        <p><i class="ph ph-currency-inr"></i> ₹${currentWorker.rate || 0} per day</p>
+        <p><i class="ph ph-trophy"></i> ${currentWorker.experience || 0} years experience</p>
+        <p><i class="ph ph-chat-circle-text"></i> ${currentWorker.languages || 'Hindi, English'}</p>
+      `;
+
+      // Update hire button
+      const hireBtn = document.getElementById("hireBtn");
+      hireBtn.textContent = `Hire ${currentWorker.name}`;
+    }
 
     document.getElementById("shareBtn").addEventListener("click", async () => {
       const url = window.location.href;
@@ -79,11 +146,13 @@
       }
     });
 
-    document.getElementById("hireBtn").addEventListener("click", () => {
+    document.getElementById("hireBtn").addEventListener("click", async () => {
       showSuccessOverlay("Request Sent!");
       showToast("Worker will contact you soon.", "success");
     });
 
+    // Load profile on page load
+    loadWorkerProfile();
     initCommonUI();
   </script>
 </body>
