@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KaamConnect - Database Setup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Baloo 2", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #1a1a1a;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 16px;
+    }
+
+    .info-box {
+      background: #f0f4ff;
+      border-left: 4px solid #667eea;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .info-box strong {
+      color: #667eea;
+    }
+
+    .button {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .button-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .log {
+      background: #1a1a1a;
+      color: #0f0;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 24px;
+      display: none;
+    }
+
+    .log.active {
+      display: block;
+    }
+
+    .log-entry {
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .log-success {
+      color: #0f0;
+    }
+
+    .log-info {
+      color: #0ff;
+    }
+
+    .log-error {
+      color: #f00;
+    }
+
+    .log-warning {
+      color: #ff0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 12px;
+      background: #f8f8f8;
+      border-radius: 8px;
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .success-message {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .success-message.active {
+      display: block;
+    }
+
+    .next-steps {
+      margin-top: 20px;
+      padding: 16px;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .next-steps.active {
+      display: block;
+    }
+
+    .next-steps h3 {
+      color: #92400e;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .next-steps ul {
+      list-style: none;
+      color: #78350f;
+      font-size: 13px;
+    }
+
+    .next-steps li {
+      padding: 6px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .next-steps li:before {
+      content: "→";
+      position: absolute;
+      left: 0;
+    }
+
+    a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1><i class="ph ph-toolbox"></i> KaamConnect Setup</h1>
+      <p>Automated Database Population</p>
+    </div>
+
+    <div class="info-box">
+      <strong>⚠️ Before you proceed:</strong><br>
+      You must create these 6 collections in Appwrite Console first:
+      <ul style="margin-top: 8px; margin-left: 16px;">
+        <li><code>workers</code></li>
+        <li><code>jobs</code></li>
+        <li><code>applications</code></li>
+        <li><code>reviews</code></li>
+        <li><code>cities</code></li>
+        <li><code>categories</code></li>
+      </ul>
+      Then this script will populate them with data.
+    </div>
+
+    <button class="button button-primary" id="setupBtn">
+      <i class="ph ph-rocket-launch"></i>
+      Start Database Setup
+    </button>
+
+    <div class="log" id="log"></div>
+
+    <div class="stats" id="stats" style="display: none;">
+      <div class="stat">
+        <div class="stat-number" id="cityCount">0</div>
+        <div class="stat-label">Cities</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number" id="categoryCount">0</div>
+        <div class="stat-label">Categories</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number" id="workerCount">0</div>
+        <div class="stat-label">Workers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number" id="jobCount">0</div>
+        <div class="stat-label">Jobs</div>
+      </div>
+    </div>
+
+    <div class="success-message" id="successMsg">
+      <strong>✅ Setup Complete!</strong><br>
+      Database has been successfully populated. Start testing the app!
+    </div>
+
+    <div class="next-steps" id="nextSteps">
+      <h3>🎯 Next Steps:</h3>
+      <ul>
+        <li>Visit <a href="/search.html" target="_blank">search.html</a> to see workers and jobs</li>
+        <li>Visit <a href="/worker-dashboard.html" target="_blank">worker-dashboard.html</a> to see job matches</li>
+        <li>Click on any worker to view their profile</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { databases, ID, appwriteConfig } from "./appwrite.js";
+
+    const setupBtn = document.getElementById("setupBtn");
+    const logDiv = document.getElementById("log");
+    const statsDiv = document.getElementById("stats");
+    const successMsg = document.getElementById("successMsg");
+    const nextSteps = document.getElementById("nextSteps");
+
+    function log(message, type = "info") {
+      const entry = document.createElement("div");
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = message;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    async function setupDatabase() {
+      setupBtn.disabled = true;
+      logDiv.classList.add("active");
+
+      const setupData = {
+        cities: [
+          "Lajpat Nagar",
+          "Karol Bagh",
+          "Saket",
+          "Rohini",
+          "Dwarka",
+          "South Extension",
+          "Connaught Place",
+          "Chandni Chowk",
+          "Defence Colony",
+          "Greater Kailash",
+          "Noida",
+          "Gurugram"
+        ],
+
+        categories: [
+          { id: "electrician", name: "Electrician", icon: "ph ph-flashlight" },
+          { id: "plumber", name: "Plumber", icon: "ph ph-wrench" },
+          { id: "carpenter", name: "Carpenter", icon: "ph ph-hammer" },
+          { id: "maid", name: "Maid", icon: "ph ph-broom" },
+          { id: "mechanic", name: "Mechanic", icon: "ph ph-gear-six" },
+          { id: "painter", name: "Painter", icon: "ph ph-paint-brush" },
+          { id: "mason", name: "Mason", icon: "ph ph-buildings" },
+          { id: "driver", name: "Driver", icon: "ph ph-car" },
+          { id: "cook", name: "Cook", icon: "ph ph-fork-knife" },
+          { id: "welder", name: "Welder", icon: "ph ph-fire" },
+          { id: "labour", name: "Labour", icon: "ph ph-hard-hat" }
+        ],
+
+        workers: [
+          {
+            name: "Ramesh Kumar",
+            email: "ramesh@example.com",
+            phone: "9876543210",
+            category: "electrician",
+            city: "Lajpat Nagar",
+            rate: 600,
+            experience: 8,
+            available: true,
+            reviewsCount: 47,
+            photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=60",
+            languages: "Hindi, English",
+            skills: "Home Wiring, AC Repair, Switchboard, Solar Panel, Ceiling Fan",
+            about: "Expert in home wiring, AC repair, switchboard fitting. Reliable and on time."
+          },
+          {
+            name: "Sunita Devi",
+            email: "sunita@example.com",
+            phone: "9876543201",
+            category: "maid",
+            city: "Karol Bagh",
+            rate: 400,
+            experience: 6,
+            available: true,
+            reviewsCount: 34,
+            photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=60",
+            languages: "Hindi",
+            skills: "Cleaning, Laundry, Cooking, Organizing",
+            about: "Dedicated home helper with 6 years experience"
+          },
+          {
+            name: "Raju Yadav",
+            email: "raju@example.com",
+            phone: "9876543202",
+            category: "plumber",
+            city: "Saket",
+            rate: 700,
+            experience: 9,
+            available: false,
+            reviewsCount: 19,
+            photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=60",
+            languages: "Hindi, English",
+            skills: "Pipe Fitting, Leak Repair, Installation",
+            about: "Professional plumber with 9 years experience"
+          },
+          {
+            name: "Amit Sharma",
+            email: "amit@example.com",
+            phone: "9876543203",
+            category: "carpenter",
+            city: "Rohini",
+            rate: 900,
+            experience: 10,
+            available: true,
+            reviewsCount: 26,
+            photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=60",
+            languages: "Hindi, English, Punjabi",
+            skills: "Furniture, Wooden Doors, Shelves, Repairs",
+            about: "Expert carpentry work with custom designs"
+          },
+          {
+            name: "Priya Sharma",
+            email: "priya@example.com",
+            phone: "9876543204",
+            category: "painter",
+            city: "Defence Colony",
+            rate: 450,
+            experience: 5,
+            available: true,
+            reviewsCount: 22,
+            photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&q=60",
+            languages: "Hindi, English",
+            skills: "Interior Painting, Exterior Painting, Wall Finishing",
+            about: "Professional painter with attention to detail"
+          },
+          {
+            name: "Vikram Singh",
+            email: "vikram@example.com",
+            phone: "9876543205",
+            category: "mechanic",
+            city: "Dwarka",
+            rate: 550,
+            experience: 12,
+            available: true,
+            reviewsCount: 55,
+            photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=60",
+            languages: "Hindi, English, Punjabi",
+            skills: "Car Repair, Maintenance, Diagnostic",
+            about: "Trusted mechanic with 12 years experience"
+          }
+        ],
+
+        jobs: [
+          {
+            title: "Electrician needed",
+            category: "electrician",
+            city: "Lajpat Nagar",
+            rate: 700,
+            duration: "1 week",
+            status: "open",
+            employerId: "demo_employer_1",
+            description: "Need electrician for home wiring and switchboard installation",
+            applicationsCount: 0,
+            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            title: "House Cleaning Work",
+            category: "maid",
+            city: "Dwarka",
+            rate: 500,
+            duration: "2-3 days",
+            status: "open",
+            employerId: "demo_employer_2",
+            description: "Need help for home cleaning and organizing",
+            applicationsCount: 0,
+            createdAt: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            title: "Plumbing Repair",
+            category: "plumber",
+            city: "South Extension",
+            rate: 600,
+            duration: "1 day",
+            status: "open",
+            employerId: "demo_employer_3",
+            description: "Leak repair in kitchen and bathroom",
+            applicationsCount: 0,
+            createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            title: "Custom Furniture Design",
+            category: "carpenter",
+            city: "Connaught Place",
+            rate: 800,
+            duration: "1 week",
+            status: "open",
+            employerId: "demo_employer_4",
+            description: "Need carpenter for custom wardrobe and shelves",
+            applicationsCount: 0,
+            createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            title: "Interior Painting",
+            category: "painter",
+            city: "Defence Colony",
+            rate: 500,
+            duration: "3 days",
+            status: "open",
+            employerId: "demo_employer_5",
+            description: "Bedroom and living room painting - 3 rooms total",
+            applicationsCount: 0,
+            createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            title: "Car Maintenance",
+            category: "mechanic",
+            city: "Dwarka",
+            rate: 650,
+            duration: "2 days",
+            status: "open",
+            employerId: "demo_employer_6",
+            description: "Regular maintenance and checkup for sedan car",
+            applicationsCount: 0,
+            createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+          }
+        ],
+
+        reviews: [
+          {
+            workerId: "temp_worker_1",
+            employerId: "demo_employer_1",
+            rating: 5,
+            comment: "Excellent work! Very professional and on time.",
+            jobId: "temp_job_1",
+            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            workerId: "temp_worker_1",
+            employerId: "demo_employer_2",
+            rating: 5,
+            comment: "Great service, highly recommend!",
+            jobId: "temp_job_2",
+            createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            workerId: "temp_worker_2",
+            employerId: "demo_employer_3",
+            rating: 5,
+            comment: "Very clean and organized work.",
+            jobId: "temp_job_3",
+            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ]
+      };
+
+      try {
+        log("🚀 Starting KaamConnect Database Setup...", "info");
+        log("\n📋 NOTE: Collections should already exist in Appwrite console", "info");
+        log("If they don't exist, create these in your Appwrite console:", "warning");
+        log("  • workers", "warning");
+        log("  • jobs", "warning");
+        log("  • applications", "warning");
+        log("  • reviews", "warning");
+        log("  • cities", "warning");
+        log("  • categories", "warning");
+
+        // Step 1: Add Cities
+        log("\n🏙️  Step 1: Adding Cities...", "info");
+        for (const city of setupData.cities) {
+          try {
+            await databases.createDocument(
+              appwriteConfig.databaseId,
+              "cities",
+              ID.unique(),
+              { name: city }
+            );
+          } catch (error) {
+            if (error.code !== 409) {
+              log(`⚠️  ${error.message}`, "warning");
+            }
+          }
+        }
+        log(`✅ Added ${setupData.cities.length} cities`, "success");
+
+        // Step 2: Add Categories
+        log("\n🏷️  Step 2: Adding Categories...", "info");
+        for (const category of setupData.categories) {
+          try {
+            await databases.createDocument(
+              appwriteConfig.databaseId,
+              "categories",
+              category.id,
+              category
+            );
+          } catch (error) {
+            if (error.code !== 409) {
+              log(`⚠️  ${error.message}`, "warning");
+            }
+          }
+        }
+        log(`✅ Added ${setupData.categories.length} categories`, "success");
+
+        // Step 3: Add Workers
+        log("\n👷 Step 3: Adding Workers...", "info");
+        for (const worker of setupData.workers) {
+          try {
+            await databases.createDocument(
+              appwriteConfig.databaseId,
+              "workers",
+              ID.unique(),
+              worker
+            );
+            log(`✅ Added: ${worker.name}`, "success");
+          } catch (error) {
+            if (error.code !== 409) {
+              log(`⚠️  Failed to add ${worker.name}: ${error.message}`, "warning");
+            }
+          }
+        }
+
+        // Step 4: Add Jobs
+        log("\n💼 Step 4: Adding Jobs...", "info");
+        for (const job of setupData.jobs) {
+          try {
+            await databases.createDocument(
+              appwriteConfig.databaseId,
+              "jobs",
+              ID.unique(),
+              job
+            );
+            log(`✅ Added: ${job.title}`, "success");
+          } catch (error) {
+            if (error.code !== 409) {
+              log(`⚠️  Failed to add ${job.title}: ${error.message}`, "warning");
+            }
+          }
+        }
+
+        // Step 5: Add Reviews
+        log("\n⭐ Step 5: Adding Reviews...", "info");
+        for (const review of setupData.reviews) {
+          try {
+            await databases.createDocument(
+              appwriteConfig.databaseId,
+              "reviews",
+              ID.unique(),
+              review
+            );
+          } catch (error) {
+            if (error.code !== 409) {
+              log(`⚠️  ${error.message}`, "warning");
+            }
+          }
+        }
+        log(`✅ Added ${setupData.reviews.length} reviews`, "success");
+
+        log("\n✅ DATABASE SETUP COMPLETE! 🎉", "success");
+
+        // Show stats
+        statsDiv.style.display = "grid";
+        document.getElementById("cityCount").textContent = setupData.cities.length;
+        document.getElementById("categoryCount").textContent = setupData.categories.length;
+        document.getElementById("workerCount").textContent = setupData.workers.length;
+        document.getElementById("jobCount").textContent = setupData.jobs.length;
+
+        // Show success message and next steps
+        successMsg.classList.add("active");
+        nextSteps.classList.add("active");
+
+      } catch (error) {
+        log(`❌ Setup Failed: ${error.message}`, "error");
+      } finally {
+        setupBtn.disabled = false;
+      }
+    }
+
+    setupBtn.addEventListener("click", setupDatabase);
+  </script>
+</body>
+</html>
