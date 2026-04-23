@@ -10,7 +10,7 @@ It is built with HTML5, CSS3, and Vanilla JavaScript, with Appwrite as backend.
 - Appwrite SDK: Web SDK v14 via CDN
 - Fonts: Baloo 2, Hind, Noto Sans Devanagari
 - Icons: Phosphor Icons CDN
-- i18n: Custom JS switcher (EN / HI / MR)
+- i18n: Custom JS switcher (EN / HI)
 - Auth: Appwrite email/password plus Google OAuth
 
 ## Files
@@ -29,7 +29,6 @@ It is built with HTML5, CSS3, and Vanilla JavaScript, with Appwrite as backend.
 - worker-profile.html
 - locales/en.json
 - locales/hi.json
-- locales/mr.json
 
 ## Appwrite Setup
 

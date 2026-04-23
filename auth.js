@@ -65,18 +65,8 @@ function validateRegisterForm(payload) {
     role: payload.role ? "" : "Please choose who you are",
     name: validateName(payload.name),
     email: validateEmail(payload.email),
-    password: validatePassword(payload.password),
-    city: validateCity(payload.city)
+    password: validatePassword(payload.password)
   };
-
-  if (payload.role === "worker") {
-    if (!payload.workType) {
-      errors.workType = "Please choose your work type";
-    } else {
-      errors.workType = "";
-    }
-    errors.dailyRate = validateDailyRate(payload.dailyRate);
-  }
 
   return errors;
 }
@@ -108,12 +98,34 @@ async function loginWithEmailPassword(email, password) {
     const session = await account.createEmailPasswordSession(normalizeEmail(email), password);
     return { ok: true, session, errors: {} };
   } catch (error) {
+    const isActiveSessionError =
+      error?.type === "user_session_already_exists" ||
+      error?.code === 401 && String(error?.message || "").toLowerCase().includes("session is active");
+
+    if (isActiveSessionError) {
+      try {
+        await account.deleteSession("current");
+        const session = await account.createEmailPasswordSession(normalizeEmail(email), password);
+        return { ok: true, session, errors: {} };
+      } catch (retryError) {
+        logAuthError("loginWithEmailPasswordRetry", retryError, { email: normalizeEmail(email) });
+        return {
+          ok: false,
+          errors: {
+            email: "",
+            password: "You're already signed in. Please log out first and try again."
+          },
+          error: retryError
+        };
+      }
+    }
+
     logAuthError("loginWithEmailPassword", error, { email: normalizeEmail(email) });
     return {
       ok: false,
       errors: {
         email: "",
-        password: "Wrong password. Try again."
+        password: "Email or password is incorrect."
       },
       error
     };
@@ -135,6 +147,25 @@ async function registerUser(payload) {
     try {
       await account.createEmailPasswordSession(email, payload.password);
     } catch (sessionError) {
+      const isActiveSessionError =
+        sessionError?.type === "user_session_already_exists" ||
+        sessionError?.code === 401 && String(sessionError?.message || "").toLowerCase().includes("session is active");
+
+      if (isActiveSessionError) {
+        try {
+          await account.deleteSession("current");
+          await account.createEmailPasswordSession(email, payload.password);
+        } catch (retrySessionError) {
+          console.warn("Session creation retry failed after registration", {
+            email,
+            message: retrySessionError?.message,
+            code: retrySessionError?.code,
+            type: retrySessionError?.type,
+            response: retrySessionError?.response
+          });
+        }
+      }
+
       console.warn("Session creation failed after registration", {
         email,
         message: sessionError?.message,
@@ -149,7 +180,7 @@ async function registerUser(payload) {
     logAuthError("registerUser", error, {
       email,
       role: payload.role,
-      city: payload.city,
+      city: payload.city || null,
       workType: payload.workType || null
     });
     const message = String(error?.message || "").toLowerCase();

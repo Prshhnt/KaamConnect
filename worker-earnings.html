@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Worker Earnings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="stats-grid-3">
+    <article class="stat-card"><div><div class="stat-value" id="lifetimeEarn">₹0</div><div class="stat-label">Lifetime Earnings</div></div></article>
+    <article class="stat-card"><div><div class="stat-value" id="monthEarn">₹0</div><div class="stat-label">This Month</div></div></article>
+    <article class="stat-card"><div><div class="stat-value" id="jobsDone">0</div><div class="stat-label">Completed Jobs</div></div></article>
+  </section>
+  <section class="data-table-wrapper" style="margin-top:16px"><div class="table-scroll"><table><thead><tr><th>Job</th><th>Date</th><th>Status</th><th>Amount</th></tr></thead><tbody id="earningsBody"></tbody></table></div></section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showSkeletons, hideSkeletons, showToast, formatINR, timeAgo, animateCounter } from "./js/dashboard.js";
+
+async function loadPage() {
+  const shell = await initDashboard("worker", "Earnings");
+  if (!shell) return;
+  const body = document.getElementById("earningsBody");
+  showSkeletons(body, 6);
+
+  try {
+    const [appsRes, jobsRes] = await Promise.all([
+      db.listDocuments(DB_ID, "applications", [Query.equal("workerId", shell.user.$id), Query.limit(500)]),
+      db.listDocuments(DB_ID, "jobs", [Query.limit(500)])
+    ]);
+
+    const jobs = new Map(jobsRes.documents.map((j) => [j.$id, j]));
+    const settled = appsRes.documents.filter((a) => ["accepted", "completed"].includes(a.status || ""));
+
+    const monthStart = new Date();
+    monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+
+    const rows = settled.map((app) => {
+      const job = jobs.get(app.jobId);
+      const amount = Number(job?.wage || job?.salary || 0);
+      return { app, job, amount };
+    });
+
+    const lifetime = rows.reduce((sum, item) => sum + item.amount, 0);
+    const month = rows.filter((r) => new Date(r.app.$updatedAt || r.app.$createdAt) >= monthStart).reduce((sum, item) => sum + item.amount, 0);
+
+    document.getElementById("lifetimeEarn").textContent = formatINR(lifetime);
+    document.getElementById("monthEarn").textContent = formatINR(month);
+    animateCounter(document.getElementById("jobsDone"), rows.length);
+
+    hideSkeletons(body);
+    if (!rows.length) {
+      body.innerHTML = `<tr><td colspan="4" style="color:var(--text-muted)">No earnings recorded yet.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = rows.sort((a,b)=> new Date(b.app.$updatedAt)-new Date(a.app.$updatedAt)).map((row) => `
+      <tr>
+        <td>${row.job?.title || "Job"}</td>
+        <td>${timeAgo(row.app.$updatedAt || row.app.$createdAt)}</td>
+        <td><span class="badge badge-success"><span class="badge-dot"></span>${row.app.status}</span></td>
+        <td>${formatINR(row.amount)}</td>
+      </tr>`).join("");
+  } catch {
+    hideSkeletons(body);
+    body.innerHTML = `<tr><td colspan="4" style="color:var(--danger)">Could not load earnings.</td></tr>`;
+    showToast("Unable to load earnings data.", "error");
+  }
+}
+
+loadPage();
+</script>
+</body></html>

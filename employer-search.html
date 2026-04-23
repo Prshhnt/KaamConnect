@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Find Workers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="data-table-wrapper" style="padding:14px">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px">
+      <input class="form-control" id="searchInput" placeholder="Search skill or worker name" />
+      <input class="form-control" id="cityInput" placeholder="City" />
+      <input class="form-control" id="categoryInput" placeholder="Category" />
+      <button class="btn btn-outline" id="searchBtn">Search</button>
+    </div>
+  </section>
+  <section id="workerGrid" class="dashboard-cards" style="margin-top:16px"></section>
+</main>
+<script type="module">
+import { db, functions, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showSkeletons, hideSkeletons, showToast } from "./js/dashboard.js";
+
+let allWorkers = [];
+
+function render() {
+  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  const city = document.getElementById("cityInput").value.toLowerCase().trim();
+  const category = document.getElementById("categoryInput").value.toLowerCase().trim();
+  const wrap = document.getElementById("workerGrid");
+
+  const filtered = allWorkers.filter((w) => {
+    const text = `${w.name || ""} ${w.category || ""} ${Array.isArray(w.skills) ? w.skills.join(" ") : w.skills || ""}`.toLowerCase();
+    const c1 = !q || text.includes(q);
+    const c2 = !city || String(w.city || "").toLowerCase().includes(city);
+    const c3 = !category || String(w.category || "").toLowerCase().includes(category);
+    return c1 && c2 && c3;
+  });
+
+  if (!filtered.length) {
+    wrap.innerHTML = `<article class="worker-card-mini">No workers found for this search.</article>`;
+    return;
+  }
+
+  wrap.innerHTML = filtered.map((w) => `
+    <article class="worker-card-mini">
+      <h3 style="font-size:16px">${w.name || "Worker"}</h3>
+      <p style="color:var(--text-muted)">${w.city || "-"} • ${w.category || "General"}</p>
+      <p style="margin-top:8px">${(w.about || w.bio) ? (w.about || w.bio).slice(0, 120) : "No bio available."}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        ${(Array.isArray(w.skills) ? w.skills : String(w.skills || "").split(",").map((x)=>x.trim()).filter(Boolean)).slice(0,4).map((s)=>`<span class="badge badge-info">${s}</span>`).join("")}
+      </div>
+    </article>
+  `).join("");
+}
+
+async function loadWorkersViaFunction() {
+  try {
+    const execution = await functions.createExecution("fn_nearby_workers", JSON.stringify({}), false);
+    const parsed = JSON.parse(execution.responseBody || "[]");
+    if (Array.isArray(parsed) && parsed.length) {
+      return parsed;
+    }
+  } catch {
+    // fallback below
+  }
+  return null;
+}
+
+async function loadPage() {
+  const shell = await initDashboard("employer", "Find Workers");
+  if (!shell) return;
+  const wrap = document.getElementById("workerGrid");
+  showSkeletons(wrap, 8);
+
+  try {
+    const fromFn = await loadWorkersViaFunction();
+    if (fromFn) {
+      allWorkers = fromFn;
+    } else {
+      const res = await db.listDocuments(DB_ID, "workers", [Query.limit(300)]);
+      allWorkers = res.documents;
+    }
+    hideSkeletons(wrap);
+    render();
+  } catch {
+    hideSkeletons(wrap);
+    wrap.innerHTML = `<article class="worker-card-mini" style="color:var(--danger)">Unable to load workers right now.</article>`;
+    showToast("Could not load workers.", "error");
+  }
+
+  ["searchInput", "cityInput", "categoryInput"].forEach((id) => document.getElementById(id).addEventListener("input", render));
+  document.getElementById("searchBtn").addEventListener("click", render);
+}
+
+loadPage();
+</script>
+</body></html>

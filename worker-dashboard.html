@@ -1,162 +1,258 @@
-<!DOCTYPE html>
-<html lang="en" class="page-enter">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Worker Dashboard - KaamConnect</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
-  <link rel="stylesheet" href="./style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KaamConnect | Worker Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/dashboard.css" />
+  <script src="https://unpkg.com/phosphor-icons" defer></script>
 </head>
-<body>
-  <main class="container section">
-    <h1>Good morning, Ramesh</h1>
+<body class="dashboard-shell worker-dashboard-page">
+  <a href="#mainContent" class="skip-link">Skip to content</a>
+  <div id="sidebarMount"></div>
+  <div id="overlayMount"></div>
+  <div id="topbarMount"></div>
 
-    <section class="card" style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+  <main id="mainContent" class="dashboard-main" tabindex="-1">
+    <section class="stats-grid-4" aria-label="Worker metrics">
+      <article class="stat-card">
+        <div class="stat-icon" style="background:var(--primary-light);color:var(--primary)"><i class="ph ph-briefcase"></i></div>
         <div>
-          <h3>You are currently: <span id="availabilityText" style="color:var(--success)"><i class="ph ph-circle-fill"></i> AVAILABLE</span></h3>
-          <p>Toggle to go Busy</p>
+          <div class="stat-value" id="activeAppsCount">0</div>
+          <div class="stat-label">Active Applications</div>
         </div>
-        <button class="toggle touch-target active" id="availabilityToggle"></button>
-      </div>
-    </section>
-
-    <section class="stats-grid" style="margin-top:12px">
-      <article class="card stat-card"><p class="stat-value">3</p><p>Active Apps</p></article>
-      <article class="card stat-card"><p class="stat-value">12</p><p>Total Jobs</p></article>
-      <article class="card stat-card"><p class="stat-value"><i class="ph ph-star"></i> 4.8</p><p>Rating</p></article>
-    </section>
-
-    <section style="margin-top:14px">
-      <h2><i class="ph ph-briefcase"></i> New Jobs Matching You</h2>
-      <div id="matchJobs" class="dashboard-grid" style="margin-top:10px"></div>
-    </section>
-
-    <section style="margin-top:16px">
-      <h2>Applied Jobs</h2>
-      <div id="appliedJobs" class="dashboard-grid" style="margin-top:10px"></div>
-    </section>
-
-    <section class="card" style="margin-top:16px">
-      <h2>Profile</h2>
-      <div style="margin-top:8px;background:#EEE;border-radius:9999px;height:10px;overflow:hidden"><div style="height:100%;width:75%;background:var(--primary)"></div></div>
-      <p style="margin-top:6px">Profile 75% Complete. Add photo to complete.</p>
-      <div style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin-top:12px">
-        <img class="preview-photo" style="display:block" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=60" alt="Ramesh">
+      </article>
+      <article class="stat-card">
+        <div class="stat-icon" style="background:var(--success-light);color:var(--success)"><i class="ph ph-currency-inr"></i></div>
         <div>
-          <h3>Ramesh Kumar</h3>
-          <p><i class="ph ph-flashlight"></i> Electrician · Delhi</p>
-          <p><i class="ph ph-star"></i> 4.9 · 47 reviews</p>
+          <div class="stat-value" id="monthEarnCount">0</div>
+          <div class="stat-label">This Month Earnings</div>
         </div>
-        <a href="register.html" class="btn btn-outline touch-target"><i class="ph ph-pencil-simple"></i> Edit</a>
-      </div>
-      <div style="margin-top:10px">
-        <p>My Work: <i class="ph ph-flashlight"></i> Electrician</p>
-        <p>Daily Rate: ₹600/day</p>
-        <p>Experience: 8 years</p>
-        <p>City: Delhi</p>
-        <p>Phone: 98765XXXXX</p>
-      </div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-icon" style="background:var(--warning-light);color:var(--warning)"><i class="ph ph-star"></i></div>
+        <div>
+          <div class="stat-value" id="ratingCount">0.0</div>
+          <div class="stat-label">Average Rating</div>
+        </div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-icon" style="background:var(--secondary-light);color:var(--secondary)"><i class="ph ph-check-circle"></i></div>
+        <div>
+          <div class="stat-value" id="completionCount">0%</div>
+          <div class="stat-label">Profile Completion</div>
+        </div>
+      </article>
     </section>
 
-    <div class="spacer-bottom-nav"></div>
+    <section style="margin-top:20px" class="page-grid">
+      <div class="data-table-wrapper">
+        <div class="data-table-header">
+          <div class="data-table-title">Recent Applications</div>
+          <a href="worker-applications.html" class="section-action">View all</a>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Job</th>
+                <th>Category</th>
+                <th>Applied</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="data-table-wrapper">
+        <div class="data-table-header">
+          <div class="data-table-title">Jobs Matching Your Skills</div>
+          <a href="worker-jobs.html" class="section-action">Browse jobs</a>
+        </div>
+        <div id="matchingJobsCards" class="dashboard-cards" style="padding:14px"></div>
+      </div>
+
+      <div class="data-table-wrapper" style="padding:18px">
+        <div class="section-header" style="margin-bottom:10px">
+          <h2 class="section-title">Availability</h2>
+        </div>
+        <p style="color:var(--text-muted);margin-bottom:12px">Control whether employers can directly contact you for urgent jobs.</p>
+        <button id="availabilityToggle" class="avail-toggle" aria-label="Toggle availability"></button>
+      </div>
+    </section>
   </main>
 
-  <nav class="bottom-nav">
-    <a href="worker-dashboard.html" class="bottom-tab active"><i class="ph ph-house"></i><span>Home</span></a>
-    <a href="search.html" class="bottom-tab"><i class="ph ph-magnifying-glass"></i><span>Search</span></a>
-    <a href="worker-dashboard.html" class="bottom-tab"><i class="ph ph-briefcase"></i><span>Jobs</span></a>
-    <a href="worker-profile.html" class="bottom-tab"><i class="ph ph-user"></i><span>Profile</span></a>
+  <nav class="mobile-tabbar" aria-label="Mobile navigation">
+    <a href="worker-dashboard.html"><i class="ph ph-house"></i><span>Home</span></a>
+    <a href="worker-jobs.html"><i class="ph ph-magnifying-glass"></i><span>Jobs</span></a>
+    <a href="worker-applications.html"><i class="ph ph-briefcase"></i><span>Apps</span></a>
+    <a href="worker-profile.html"><i class="ph ph-user"></i><span>Profile</span></a>
   </nav>
 
   <script type="module">
-    import { initCommonUI, renderJobCard, showToast, setupPullToRefresh, showEmptyState, renderSkeletonCards } from "./main.js";
-    import { fetchJobs, account } from "./appwrite.js";
+    import { db, DB_ID } from "./js/appwrite.js";
+    import { Query, ID } from "./js/appwrite.js";
+    import { initDashboard, showSkeletons, hideSkeletons, showToast, timeAgo, formatINR, animateCounter } from "./js/dashboard.js";
 
-    let matches = [];
-    let applied = [];
+    const statusClass = {
+      pending: "badge-warning",
+      accepted: "badge-success",
+      rejected: "badge-danger",
+      withdrawn: "badge-neutral",
+      completed: "badge-info"
+    };
 
-    const matchJobsNode = document.getElementById("matchJobs");
-    const appliedJobsNode = document.getElementById("appliedJobs");
+    function profileCompletion(profile) {
+      const fields = [
+        profile?.name,
+        profile?.phone,
+        profile?.city,
+        profile?.category,
+        profile?.experience,
+        profile?.skills,
+        profile?.about || profile?.bio,
+        profile?.rate ?? profile?.hourlyRate
+      ];
+      let filled = 0;
+      fields.forEach((value) => {
+        if (Array.isArray(value)) {
+          if (value.length) filled += 1;
+          return;
+        }
+        if (value !== null && value !== undefined && String(value).trim() !== "") filled += 1;
+      });
+      return Math.round((filled / fields.length) * 100);
+    }
 
-    async function loadJobs() {
+    async function loadWorkerDashboard() {
+      const shell = await initDashboard("worker", "Worker Dashboard");
+      if (!shell) return;
+
+      const body = document.getElementById("applicationsTableBody");
+      const jobsWrap = document.getElementById("matchingJobsCards");
+      showSkeletons(body, 3);
+      showSkeletons(jobsWrap, 2);
+
       try {
-        renderSkeletonCards(matchJobsNode, 2);
-        
-        // Get current user
-        const user = await account.get();
-        
-        // Fetch jobs that match this worker
-        matches = await fetchJobs({ status: "open" });
-        
-        // Fetch applied jobs (in real app, would query applications collection)
-        applied = [];
-        
-        renderMatchingJobs();
-        renderAppliedJobs();
-      } catch (error) {
-        console.error("Failed to load jobs:", error);
-        showEmptyState({
-          container: matchJobsNode,
-          title: "Unable to load jobs",
-          message: "Please check your connection"
+        const workerId = shell.user.$id;
+        const [appsRes, jobsRes, reviewsRes] = await Promise.all([
+          db.listDocuments(DB_ID, "applications", [Query.equal("workerId", workerId), Query.orderDesc("$createdAt"), Query.limit(50)]),
+          db.listDocuments(DB_ID, "jobs", [Query.orderDesc("$createdAt"), Query.limit(200)]),
+          db.listDocuments(DB_ID, "reviews", [Query.equal("workerId", workerId), Query.limit(100)])
+        ]);
+
+        const apps = appsRes.documents;
+        const jobs = jobsRes.documents;
+        const reviews = reviewsRes.documents;
+
+        const jobMap = new Map(jobs.map((job) => [job.$id, job]));
+        const activeApps = apps.filter((item) => ["pending", "accepted"].includes(item.status)).length;
+
+        const monthStart = new Date();
+        monthStart.setDate(1);
+        monthStart.setHours(0, 0, 0, 0);
+
+        const monthEarnings = apps
+          .filter((item) => item.status === "accepted" || item.status === "completed")
+          .filter((item) => new Date(item.$updatedAt || item.$createdAt) >= monthStart)
+          .reduce((sum, item) => {
+            const job = jobMap.get(item.jobId);
+            return sum + Number(job?.wage || job?.salary || 0);
+          }, 0);
+
+        const avgRating = reviews.length
+          ? (reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / reviews.length).toFixed(1)
+          : "0.0";
+
+        animateCounter(document.getElementById("activeAppsCount"), activeApps);
+        document.getElementById("monthEarnCount").textContent = formatINR(monthEarnings);
+        document.getElementById("ratingCount").textContent = String(avgRating);
+        document.getElementById("completionCount").textContent = `${profileCompletion(shell.profile)}%`;
+
+        hideSkeletons(body);
+        if (!apps.length) {
+          body.innerHTML = `<tr><td colspan="5" style="color:var(--text-muted)">No applications yet. Start by exploring jobs.</td></tr>`;
+        } else {
+          body.innerHTML = apps.slice(0, 6).map((app) => {
+            const job = jobMap.get(app.jobId);
+            const badge = statusClass[app.status] || "badge-neutral";
+            return `
+              <tr>
+                <td>${job?.title || "Job removed"}</td>
+                <td>${job?.category || "General"}</td>
+                <td>${timeAgo(app.$createdAt)}</td>
+                <td><span class="badge ${badge}"><span class="badge-dot"></span>${app.status || "pending"}</span></td>
+                <td><a href="worker-applications.html" class="section-action">Details</a></td>
+              </tr>
+            `;
+          }).join("");
+        }
+
+        const skills = Array.isArray(shell.profile?.skills) ? shell.profile.skills.map((s) => String(s).toLowerCase()) : [];
+        const matches = jobs
+          .filter((job) => (job.status || "open") === "open")
+          .filter((job) => {
+            const category = String(job.category || "").toLowerCase();
+            const title = String(job.title || "").toLowerCase();
+            return skills.some((skill) => category.includes(skill) || title.includes(skill));
+          })
+          .slice(0, 4);
+
+        hideSkeletons(jobsWrap);
+        if (!matches.length) {
+          jobsWrap.innerHTML = `<div class="job-card-mini">No direct matches found right now. Explore all available listings for fresh opportunities.</div>`;
+        } else {
+          jobsWrap.innerHTML = matches.map((job) => `
+            <article class="job-card-mini">
+              <h3 style="font-size:16px;margin-bottom:4px">${job.title}</h3>
+              <p style="color:var(--text-muted);font-size:13px">${job.city || "City not specified"} • ${job.category || "General"}</p>
+              <p style="margin-top:10px;font-weight:700">${formatINR(job.wage || job.salary || 0)}</p>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <a class="btn btn-primary" href="worker-jobs.html">View Job</a>
+              </div>
+            </article>
+          `).join("");
+        }
+
+        const toggle = document.getElementById("availabilityToggle");
+        const isAvailable = String(shell.profile?.availability || "available") !== "busy";
+        toggle.classList.toggle("on", isAvailable);
+        toggle.setAttribute("aria-pressed", String(isAvailable));
+
+        toggle.addEventListener("click", async () => {
+          const current = toggle.classList.contains("on");
+          const next = !current;
+          toggle.classList.add("btn-loading");
+          try {
+            await db.updateDocument(DB_ID, "workers", shell.profile.$id, {
+              availability: next ? "available" : "busy"
+            });
+            toggle.classList.toggle("on", next);
+            toggle.setAttribute("aria-pressed", String(next));
+            showToast(next ? "You are now marked available" : "You are now marked busy");
+          } catch {
+            showToast("Could not update availability. Please try again.", "error");
+          } finally {
+            toggle.classList.remove("btn-loading");
+          }
         });
+      } catch {
+        hideSkeletons(body);
+        hideSkeletons(jobsWrap);
+        body.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">Could not load applications right now.</td></tr>`;
+        jobsWrap.innerHTML = `<div class="job-card-mini" style="color:var(--danger)">Could not load matching jobs right now.</div>`;
+        showToast("Dashboard data failed to load.", "error");
       }
     }
 
-    function renderMatchingJobs() {
-      if (!matches.length) {
-        showEmptyState({
-          container: matchJobsNode,
-          title: "No matching jobs",
-          message: "Check back soon for new opportunities",
-          iconClass: "ph ph-briefcase"
-        });
-        return;
-      }
-      matchJobsNode.innerHTML = matches.map(renderJobCard).join("");
-    }
-
-    function renderAppliedJobs() {
-      if (!applied.length) {
-        appliedJobsNode.innerHTML = '<article class="card"><p style="text-align:center;color:#999">No applications yet</p></article>';
-        return;
-      }
-      appliedJobsNode.innerHTML = applied.map((job) => {
-        const call = job.status === "accepted" ? `<a class="btn btn-primary touch-target" href="tel:${job.employerPhone || "9876543210"}" style="margin-top:10px"><i class="ph ph-phone"></i> Call Employer</a>` : "";
-        return `<article class="card"><span class="badge ${job.status}">${job.status.toUpperCase()}</span><h3 style="margin-top:6px">${job.title}</h3><p>${job.location} · ₹${job.rate}/day</p><p>Applied ${getRelativeTime(job.appliedAt)}</p>${call}</article>`;
-      }).join("");
-    }
-
-    function getRelativeTime(isoDate) {
-      const ms = Date.now() - new Date(isoDate).getTime();
-      const days = Math.floor(ms / (24 * 60 * 60 * 1000));
-      if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-      const hours = Math.floor(ms / (60 * 60 * 1000));
-      if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-      return 'just now';
-    }
-
-    const toggle = document.getElementById("availabilityToggle");
-    const text = document.getElementById("availabilityText");
-    toggle.addEventListener("click", () => {
-      const active = toggle.classList.toggle("active");
-      text.innerHTML = active ? '<i class="ph ph-circle-fill"></i> AVAILABLE' : '<i class="ph ph-circle-fill"></i> BUSY';
-      text.style.color = active ? "var(--success)" : "var(--danger)";
-      showToast(active ? "You are now available" : "You are now busy", "success");
-    });
-
-    setupPullToRefresh(() => {
-      showToast("Refreshing jobs...", "success");
-      window.location.reload();
-    });
-
-    // Load jobs on page load
-    loadJobs();
-    initCommonUI();
+    loadWorkerDashboard();
   </script>
 </body>
 </html>

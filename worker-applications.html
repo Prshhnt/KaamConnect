@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KaamConnect | My Applications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/dashboard.css" />
+  <script src="https://unpkg.com/phosphor-icons" defer></script>
+</head>
+<body class="dashboard-shell">
+  <a href="#mainContent" class="skip-link">Skip to content</a>
+  <div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+  <main id="mainContent" class="dashboard-main" tabindex="-1">
+    <div class="data-table-wrapper">
+      <div class="data-table-header">
+        <div class="data-table-title">Application Tracker</div>
+      </div>
+      <div style="display:flex;gap:8px;padding:14px;flex-wrap:wrap">
+        <button class="btn btn-outline" data-filter="all">All</button>
+        <button class="btn btn-outline" data-filter="pending">Pending</button>
+        <button class="btn btn-outline" data-filter="accepted">Accepted</button>
+        <button class="btn btn-outline" data-filter="rejected">Rejected</button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Job</th><th>City</th><th>Applied</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="appsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <script type="module">
+    import { db, DB_ID } from "./js/appwrite.js";
+    import { Query, ID } from "./js/appwrite.js";
+    import { initDashboard, showSkeletons, hideSkeletons, showToast, showConfirm, timeAgo } from "./js/dashboard.js";
+
+    const statusClass = { pending: "badge-warning", accepted: "badge-success", rejected: "badge-danger", completed: "badge-info", withdrawn: "badge-neutral" };
+    let shellData;
+    let apps = [];
+    let jobs = new Map();
+
+    function draw(filter = "all") {
+      const body = document.getElementById("appsBody");
+      const rows = apps.filter((a) => filter === "all" || (a.status || "pending") === filter);
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="5" style="color:var(--text-muted)">No applications in this state.</td></tr>`;
+        return;
+      }
+      body.innerHTML = rows.map((app) => {
+        const job = jobs.get(app.jobId);
+        const canWithdraw = (app.status || "pending") === "pending";
+        return `<tr>
+          <td>${job?.title || "Job removed"}</td>
+          <td>${job?.city || "-"}</td>
+          <td>${timeAgo(app.$createdAt)}</td>
+          <td><span class="badge ${statusClass[app.status] || "badge-neutral"}"><span class="badge-dot"></span>${app.status || "pending"}</span></td>
+          <td>${canWithdraw ? `<button class="btn btn-outline" data-withdraw="${app.$id}">Withdraw</button>` : `<a class="section-action" href="worker-jobs.html">Find jobs</a>`}</td>
+        </tr>`;
+      }).join("");
+
+      body.querySelectorAll("[data-withdraw]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const appId = btn.getAttribute("data-withdraw");
+          showConfirm("Withdraw Application", "This will move your application to withdrawn state.", async () => {
+            await db.updateDocument(DB_ID, "applications", appId, { status: "withdrawn" });
+            apps = apps.map((a) => (a.$id === appId ? { ...a, status: "withdrawn" } : a));
+            draw(filter);
+            showToast("Application withdrawn", "warning");
+          });
+        });
+      });
+    }
+
+    async function loadPage() {
+      shellData = await initDashboard("worker", "My Applications");
+      if (!shellData) return;
+      const body = document.getElementById("appsBody");
+      showSkeletons(body, 4);
+
+      try {
+        const [appsRes, jobsRes] = await Promise.all([
+          db.listDocuments(DB_ID, "applications", [Query.equal("workerId", shellData.user.$id), Query.orderDesc("$createdAt"), Query.limit(200)]),
+          db.listDocuments(DB_ID, "jobs", [Query.limit(200)])
+        ]);
+        apps = appsRes.documents;
+        jobs = new Map(jobsRes.documents.map((j) => [j.$id, j]));
+        hideSkeletons(body);
+        draw("all");
+      } catch {
+        hideSkeletons(body);
+        body.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">Unable to load applications right now.</td></tr>`;
+        showToast("Could not fetch applications.", "error");
+      }
+
+      document.querySelectorAll("[data-filter]").forEach((btn) => {
+        btn.addEventListener("click", () => draw(btn.getAttribute("data-filter")));
+      });
+    }
+
+    loadPage();
+  </script>
+</body>
+</html>

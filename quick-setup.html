@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en" class="page-enter">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Setup - KaamConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    .setup-shell {
+      width: min(1180px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 20px 0 32px;
+    }
+
+    .setup-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.2fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .setup-hero {
+      position: sticky;
+      top: 18px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #fff7ef 0%, #ffffff 62%);
+    }
+
+    .setup-hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -60px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249,115,22,.18), rgba(249,115,22,0));
+      pointer-events: none;
+    }
+
+    .setup-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      color: var(--text-dark);
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+
+    .setup-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--primary);
+      color: #fff;
+      box-shadow: var(--shadow-md);
+    }
+
+    .setup-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 9999px;
+      background: var(--bg-section);
+      color: var(--secondary);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .setup-badge i {
+      color: var(--primary-dark);
+    }
+
+    .setup-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .setup-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+
+    .setup-item i {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .setup-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .setup-card-head {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--bg-section), #fff);
+    }
+
+    .setup-progress {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .setup-progress-line {
+      width: 100%;
+      height: 8px;
+      background: #f1ece6;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .setup-progress-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #fb923c);
+      border-radius: inherit;
+    }
+
+    .setup-form {
+      padding: 22px;
+    }
+
+    .setup-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .setup-step-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .setup-step-subtitle {
+      color: var(--text-body);
+      margin-top: 6px;
+    }
+
+    .setup-section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border-radius: 9999px;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--secondary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .setup-photo {
+      border: 1.5px dashed var(--border-strong);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fff, var(--bg-section));
+      padding: 18px;
+      text-align: center;
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      gap: 12px;
+    }
+
+    .setup-photo img {
+      width: 110px;
+      height: 110px;
+      border-radius: 28px;
+      object-fit: cover;
+      box-shadow: var(--shadow-md);
+    }
+
+    .setup-action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .setup-small {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .setup-divider {
+      margin: 18px 0;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .quick-category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .quick-category-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      min-height: 60px;
+    }
+
+    .quick-category-card:hover,
+    .quick-category-card.active {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    .quick-category-card .emoji {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--bg-section);
+      color: var(--primary-dark);
+      flex-shrink: 0;
+    }
+
+    .quick-category-card span:last-child {
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .setup-footer-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: var(--bg-section);
+      color: var(--text-body);
+      font-size: 13px;
+    }
+
+    @media (max-width: 980px) {
+      .setup-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .setup-hero {
+        position: static;
+      }
+
+      .quick-category-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="setup-shell">
+    <div class="setup-grid">
+      <section class="card setup-hero">
+        <div class="setup-logo"><span class="setup-icon"><i class="ph ph-toolbox"></i></span> KaamConnect</div>
+        <div class="setup-badge" id="setupBadge"><i class="ph ph-briefcase"></i><span id="setupBadgeText">Worker onboarding</span></div>
+        <h1 class="hero-title" id="heroTitle" style="font-size:44px;line-height:1.05">Create your worker profile.</h1>
+        <p class="setup-step-subtitle" id="heroSubtitle">Share your trade, rates, and location so nearby employers can discover and contact you quickly.</p>
+
+        <div class="setup-list" id="heroHighlights">
+          <div class="setup-item"><i class="ph ph-map-pin"></i><div><strong>Be discoverable</strong><div class="setup-small">Add your city and work type for local visibility.</div></div></div>
+          <div class="setup-item"><i class="ph ph-currency-circle-dollar"></i><div><strong>Set clear expectations</strong><div class="setup-small">Publish your experience and daily rate.</div></div></div>
+          <div class="setup-item"><i class="ph ph-user-circle"></i><div><strong>Build trust</strong><div class="setup-small">A complete profile helps you get better responses.</div></div></div>
+        </div>
+
+        <div class="setup-footer-note">
+          This setup appears only for first-time accounts. Later updates are available from the Profile page in your dashboard.
+        </div>
+      </section>
+
+      <section class="setup-card">
+        <div class="setup-card-head">
+          <div class="setup-topbar">
+            <div>
+              <div class="setup-step-title">Complete your profile</div>
+              <div class="setup-step-subtitle" id="setupSubtitle">We’ll ask only the relevant questions.</div>
+            </div>
+            <button class="btn btn-outline touch-target" id="logoutBtn" type="button">Logout</button>
+          </div>
+          <div class="setup-progress">
+            <div class="setup-progress-line"><div class="setup-progress-fill"></div></div>
+            <small id="setupStepText">Profile setup</small>
+          </div>
+          <div class="setup-section-tag" id="setupRoleTag"><i class="ph ph-identification-card"></i> Worker profile details</div>
+        </div>
+
+        <form class="setup-form" id="setupForm">
+          <div class="dashboard-grid" style="grid-template-columns:1fr 1fr;gap:14px">
+            <div class="input-group">
+              <label class="input-label" for="nameInput">Name</label>
+              <input class="input" id="nameInput" autocomplete="name" placeholder="Your display name">
+              <p class="field-error" id="nameError"></p>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label" for="emailInput">Email</label>
+              <input class="input" id="emailInput" readonly>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label" for="phoneInput">Phone Number</label>
+              <input class="input" id="phoneInput" autocomplete="tel" placeholder="10 digit phone number">
+              <p class="field-error" id="phoneError"></p>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label" for="cityInput">City</label>
+              <input class="input" id="cityInput" placeholder="Your city">
+              <p class="field-error" id="cityError"></p>
+            </div>
+          </div>
+
+          <div class="setup-divider"></div>
+
+          <div id="workerFields">
+            <h3 class="section-title">Worker details</h3>
+            <p class="setup-small" style="margin-top:4px">Pick your trade, how much you charge, and what skills you want employers to see.</p>
+
+            <div class="input-group" style="margin-top:14px">
+              <label class="input-label">Work type</label>
+              <div class="quick-category-grid" id="categoryGrid"></div>
+              <p class="field-error" id="categoryError"></p>
+            </div>
+
+            <div class="dashboard-grid" style="grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+              <div class="input-group">
+                <label class="input-label" for="experienceInput">Experience (years)</label>
+                <input class="input" id="experienceInput" type="number" min="0" step="1" placeholder="0">
+                <p class="field-error" id="experienceError"></p>
+              </div>
+
+              <div class="input-group">
+                <label class="input-label" for="rateInput">Daily Rate</label>
+                <input class="input" id="rateInput" type="number" min="100" step="50" placeholder="500">
+                <p class="field-error" id="rateError"></p>
+              </div>
+            </div>
+
+            <div class="input-group" style="margin-top:14px">
+              <label class="input-label" for="skillsInput">Skills</label>
+              <textarea class="input" id="skillsInput" rows="2" placeholder="e.g. wiring, fan repair, inverter service"></textarea>
+              <p class="field-error" id="skillsError"></p>
+            </div>
+
+            <div class="input-group" style="margin-top:14px">
+              <label class="input-label" for="bioInput">Short Bio</label>
+              <textarea class="input" id="bioInput" rows="3" placeholder="Tell people what kind of work you do best"></textarea>
+            </div>
+          </div>
+
+          <div id="employerFields" style="display:none">
+            <h3 class="section-title">Employer details</h3>
+            <p class="setup-small" style="margin-top:4px">Tell workers a bit about your business and how to reach you.</p>
+
+            <div class="input-group" style="margin-top:14px">
+              <label class="input-label" for="companyInput">Company / Shop Name</label>
+              <input class="input" id="companyInput" placeholder="Your company name">
+              <p class="field-error" id="companyError"></p>
+            </div>
+
+            <div class="input-group" style="margin-top:14px">
+              <label class="input-label" for="websiteInput">Website</label>
+              <input class="input" id="websiteInput" placeholder="https://your-site.com">
+            </div>
+
+            <div class="input-group" style="margin-top:14px">
+              <label class="input-label" for="descriptionInput">Description</label>
+              <textarea class="input" id="descriptionInput" rows="4" placeholder="What kind of work do you hire for?"></textarea>
+            </div>
+          </div>
+
+          <div class="setup-divider"></div>
+
+          <div class="setup-grid" style="grid-template-columns:0.9fr 1.1fr;gap:14px;align-items:center">
+            <div class="setup-photo">
+              <div id="photoPreviewWrap">
+                <i class="ph ph-camera" style="font-size:42px;color:var(--primary)"></i>
+                <p style="font-weight:700;margin-top:4px">Profile photo</p>
+                <p class="setup-small">Optional but strongly recommended</p>
+                <img id="photoPreview" alt="Preview" style="display:none">
+              </div>
+            </div>
+
+            <div>
+              <div class="setup-action-row">
+                <label class="btn btn-outline touch-target" for="photoInput"><i class="ph ph-image"></i> Choose Photo</label>
+                <button class="btn btn-muted touch-target" type="button" id="clearPhotoBtn"><i class="ph ph-trash"></i> Remove</button>
+              </div>
+              <input id="photoInput" type="file" accept="image/*" style="display:none">
+              <div class="setup-footer-note">
+                When you submit this form, we create your role profile and then open your dashboard automatically.
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+            <button class="btn btn-primary touch-target" id="completeBtn" type="submit"><i class="ph ph-check-circle"></i> Finish Setup</button>
+            <button class="btn btn-outline touch-target" type="button" id="skipPhotoBtn">Save without photo</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { account, db, storage, DB_ID, BUCKET_ID, ID, Query } from "./js/appwrite.js";
+    import { categoryMeta, showToast, showLoading, hideLoading } from "./main.js";
+
+    const params = new URLSearchParams(window.location.search);
+    const storedRole = localStorage.getItem("signupRole");
+    let role = params.get("role") || storedRole || "worker";
+    if (!["worker", "employer"].includes(role)) {
+      role = "worker";
+    }
+
+    const setupBadge = document.getElementById("setupBadge");
+    const heroTitle = document.getElementById("heroTitle");
+    const heroSubtitle = document.getElementById("heroSubtitle");
+    const heroHighlights = document.getElementById("heroHighlights");
+    const setupRoleTag = document.getElementById("setupRoleTag");
+    const workerFields = document.getElementById("workerFields");
+    const employerFields = document.getElementById("employerFields");
+    const setupSubtitle = document.getElementById("setupSubtitle");
+    const setupStepText = document.getElementById("setupStepText");
+
+    const fields = {
+      name: document.getElementById("nameInput"),
+      email: document.getElementById("emailInput"),
+      phone: document.getElementById("phoneInput"),
+      city: document.getElementById("cityInput"),
+      category: document.getElementById("categoryGrid"),
+      experience: document.getElementById("experienceInput"),
+      rate: document.getElementById("rateInput"),
+      skills: document.getElementById("skillsInput"),
+      bio: document.getElementById("bioInput"),
+      company: document.getElementById("companyInput"),
+      website: document.getElementById("websiteInput"),
+      description: document.getElementById("descriptionInput"),
+      photo: document.getElementById("photoInput")
+    };
+
+    const errors = {
+      name: document.getElementById("nameError"),
+      phone: document.getElementById("phoneError"),
+      city: document.getElementById("cityError"),
+      category: document.getElementById("categoryError"),
+      experience: document.getElementById("experienceError"),
+      rate: document.getElementById("rateError"),
+      skills: document.getElementById("skillsError"),
+      company: document.getElementById("companyError")
+    };
+
+    let currentUser = null;
+    let selectedCategory = "";
+    let selectedPhoto = null;
+    let existingProfileId = null;
+
+    function normalizeSkills(value) {
+      return String(value || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .join(", ")
+        .slice(0, 255);
+    }
+
+    const roleContent = {
+      worker: {
+        badgeIcon: "ph-briefcase",
+        badgeText: "Worker onboarding",
+        title: "Set up your worker account.",
+        subtitle: "Share your trade, rates, and location so nearby employers can discover and contact you quickly.",
+        roleTag: "Worker details",
+        stepText: "Worker setup",
+        highlights: [
+          { icon: "ph-map-pin", title: "Be discoverable", text: "Add your city and work type for local visibility." },
+          { icon: "ph-currency-circle-dollar", title: "Set clear expectations", text: "Publish your experience and daily rate." },
+          { icon: "ph-user-circle", title: "Build trust", text: "A complete profile helps you get better responses." }
+        ]
+      },
+      employer: {
+        badgeIcon: "ph-buildings",
+        badgeText: "Employer onboarding",
+        title: "Set up your employer profile.",
+        subtitle: "Add business details so workers understand your requirements and contact information before applying.",
+        roleTag: "Employer profile details",
+        stepText: "Employer setup",
+        highlights: [
+          { icon: "ph-users-three", title: "Attract quality applicants", text: "A detailed company profile improves worker confidence." },
+          { icon: "ph-identification-card", title: "Share clear identity", text: "Include company name, city, phone, and website." },
+          { icon: "ph-chat-circle-dots", title: "Communicate faster", text: "Well-defined profiles lead to quicker hiring decisions." }
+        ]
+      }
+    };
+
+    function setError(node, message) {
+      node.textContent = message || "";
+      node.classList.toggle("visible", Boolean(message));
+    }
+
+    function clearErrors() {
+      Object.values(errors).forEach((node) => setError(node, ""));
+    }
+
+    function renderRoleHero() {
+      const content = roleContent[role] || roleContent.worker;
+      setupBadge.innerHTML = `<i class="ph ${content.badgeIcon}"></i><span id="setupBadgeText">${content.badgeText}</span>`;
+      heroTitle.textContent = content.title;
+      heroSubtitle.textContent = content.subtitle;
+      setupRoleTag.innerHTML = `<i class="ph ph-identification-card"></i> ${content.roleTag}`;
+      setupStepText.textContent = content.stepText;
+
+      heroHighlights.innerHTML = content.highlights.map((item) => `
+        <div class="setup-item">
+          <i class="ph ${item.icon}"></i>
+          <div>
+            <strong>${item.title}</strong>
+            <div class="setup-small">${item.text}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function buildCategoryGrid() {
+      fields.category.innerHTML = Object.entries(categoryMeta)
+        .filter(([key]) => key !== "other")
+        .map(([key, meta]) => `
+          <button type="button" class="quick-category-card" data-category="${key}">
+            <span class="emoji"><i class="${meta.icon}"></i></span>
+            <span>${meta.label}</span>
+          </button>
+        `).join("");
+
+      fields.category.querySelectorAll("[data-category]").forEach((button) => {
+        button.addEventListener("click", () => {
+          fields.category.querySelectorAll(".quick-category-card").forEach((node) => node.classList.remove("active"));
+          button.classList.add("active");
+          selectedCategory = button.dataset.category;
+        });
+      });
+    }
+
+    function showRoleUI() {
+      const isWorker = role === "worker";
+      workerFields.style.display = isWorker ? "block" : "none";
+      employerFields.style.display = isWorker ? "none" : "block";
+      setupSubtitle.textContent = isWorker
+        ? "Add the work details that help employers find and trust you."
+        : "Tell workers about your business and how to contact you.";
+      renderRoleHero();
+    }
+
+    function getProfileCollection() {
+      return role === "worker" ? "workers" : "employers";
+    }
+
+    function getDashboardUrl() {
+      return role === "worker" ? "worker-dashboard.html" : "employer-dashboard.html";
+    }
+
+    function fillBasics(user) {
+      fields.name.value = user.name || "";
+      fields.email.value = user.email || "";
+    }
+
+    function previewPhoto(file) {
+      if (!file) {
+        const preview = document.getElementById("photoPreview");
+        preview.style.display = "none";
+        preview.src = "";
+        selectedPhoto = null;
+        return;
+      }
+      selectedPhoto = file;
+      const preview = document.getElementById("photoPreview");
+      const reader = new FileReader();
+      reader.onload = () => {
+        preview.src = reader.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function uploadPhoto(file) {
+      if (!file) return "";
+      try {
+        const upload = await storage.createFile(BUCKET_ID, ID.unique(), file);
+        return upload.$id;
+      } catch (error) {
+        console.warn("Photo upload skipped", error?.message || error);
+        return "";
+      }
+    }
+
+    async function hydrateExistingProfile() {
+      try {
+        const response = await db.listDocuments(DB_ID, getProfileCollection(), [Query.equal("userId", currentUser.$id), Query.limit(1)]);
+        const existing = response.documents[0] || null;
+        existingProfileId = existing?.$id || null;
+        if (!existing) return null;
+
+        fields.name.value = existing.name || currentUser.name || "";
+        fields.phone.value = existing.phone || "";
+        fields.city.value = existing.city || "";
+        if (role === "worker") {
+          selectedCategory = existing.category || "";
+          fields.experience.value = existing.experience ?? "";
+          fields.rate.value = existing.rate ?? existing.hourlyRate ?? "";
+          fields.skills.value = Array.isArray(existing.skills) ? existing.skills.join(", ") : (existing.skills || "");
+          fields.bio.value = existing.about || existing.bio || "";
+        } else {
+          fields.company.value = existing.name || currentUser.name || "";
+          fields.website.value = existing.website || "";
+          fields.description.value = existing.description || "";
+        }
+        return existing;
+      } catch {
+        // no existing profile yet
+        return null;
+      }
+    }
+
+    async function getExistingProfileRole() {
+      try {
+        const collection = role === "employer" ? "employers" : "workers";
+        const docs = await db.listDocuments(DB_ID, collection, [Query.equal("userId", currentUser.$id), Query.limit(1)]);
+        if (docs.documents[0]) return role;
+        return null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function initPage() {
+      try {
+        currentUser = await account.get();
+      } catch {
+        window.location.href = "login.html";
+        return;
+      }
+
+      // Quick setup is a first-time flow only.
+      const existingRole = await getExistingProfileRole();
+      if (existingRole) {
+        window.location.href = existingRole === "employer" ? "employer-dashboard.html" : "worker-dashboard.html";
+        return;
+      }
+
+      showRoleUI();
+      buildCategoryGrid();
+      fillBasics(currentUser);
+      await hydrateExistingProfile();
+
+      if (role === "worker" && selectedCategory) {
+        const activeButton = fields.category.querySelector(`[data-category="${selectedCategory}"]`);
+        activeButton?.classList.add("active");
+      }
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      try {
+        await account.deleteSession("current");
+      } finally {
+        window.location.href = "login.html";
+      }
+    });
+
+    fields.photo.addEventListener("change", () => previewPhoto(fields.photo.files?.[0] || null));
+    document.getElementById("clearPhotoBtn").addEventListener("click", () => {
+      fields.photo.value = "";
+      previewPhoto(null);
+    });
+    document.getElementById("skipPhotoBtn").addEventListener("click", () => {
+      fields.photo.value = "";
+      previewPhoto(null);
+      document.getElementById("completeBtn").click();
+    });
+
+    document.getElementById("setupForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearErrors();
+
+      const name = fields.name.value.trim();
+      const phone = fields.phone.value.trim();
+      const city = fields.city.value.trim();
+      const photoFileId = await uploadPhoto(selectedPhoto);
+
+      let valid = true;
+      if (name.length < 2) {
+        setError(errors.name, "Please enter a display name");
+        valid = false;
+      }
+      if (!/^\d{10}$/.test(phone.replace(/\D/g, ""))) {
+        setError(errors.phone, "Please enter a valid 10 digit phone number");
+        valid = false;
+      }
+      if (city.length < 2) {
+        setError(errors.city, "Please enter your city");
+        valid = false;
+      }
+
+      if (role === "worker") {
+        if (!selectedCategory) {
+          setError(errors.category, "Please choose your work type");
+          valid = false;
+        }
+        const experience = Number(fields.experience.value || 0);
+        const rate = Number(fields.rate.value || 0);
+        if (experience < 0) {
+          setError(errors.experience, "Experience cannot be negative");
+          valid = false;
+        }
+        if (rate < 100) {
+          setError(errors.rate, "Daily rate must be at least ₹100");
+          valid = false;
+        }
+      } else {
+        const company = fields.company.value.trim();
+        if (company.length < 2) {
+          setError(errors.company, "Please enter your company name");
+          valid = false;
+        }
+      }
+
+      if (!valid) return;
+
+      const payload = role === "worker"
+        ? {
+            userId: currentUser.$id,
+            name,
+            email: currentUser.email,
+            phone,
+            city,
+            category: selectedCategory,
+            experience: Number(fields.experience.value || 0),
+            rate: Number(fields.rate.value || 0),
+            skills: normalizeSkills(fields.skills.value),
+            about: fields.bio.value.trim(),
+            photoFileId: photoFileId || undefined,
+            available: true
+          }
+        : {
+            userId: currentUser.$id,
+            name: fields.company.value.trim(),
+            email: currentUser.email,
+            phone,
+            city,
+            website: fields.website.value.trim(),
+            description: fields.description.value.trim(),
+            photoFileId: photoFileId || undefined
+          };
+
+      showLoading("Saving your profile...");
+      try {
+        if (existingProfileId) {
+          await db.updateDocument(DB_ID, getProfileCollection(), existingProfileId, payload);
+        } else {
+          await db.createDocument(DB_ID, getProfileCollection(), currentUser.$id, payload);
+        }
+
+        localStorage.removeItem("signupRole");
+        showToast("Setup complete", "success");
+        window.location.href = getDashboardUrl();
+      } catch (error) {
+        console.error("Profile setup failed", error);
+        showToast("Could not save your profile. Please try again.", "error");
+      } finally {
+        hideLoading();
+      }
+    });
+
+    initPage();
+  </script>
+</body>
+</html>

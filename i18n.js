@@ -1,8 +1,7 @@
-const supportedLanguages = ["en", "hi", "mr"];
+const supportedLanguages = ["en", "hi"];
 const languageLabelMap = {
   en: "English",
-  hi: "हिंदी",
-  mr: "मराठी"
+  hi: "हिंदी"
 };
 
 const localeCache = new Map();
@@ -56,6 +55,7 @@ async function applyTranslations(lang = currentLanguage) {
 
   localStorage.setItem("lang", lang);
   currentLanguage = lang;
+  document.dispatchEvent(new CustomEvent("languageChanged", { detail: { lang } }));
 }
 
 function getCurrentLanguage() {

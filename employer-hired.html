@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Hired Workers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="data-table-wrapper">
+    <div class="data-table-header"><div class="data-table-title">Hired Workers</div></div>
+    <div class="table-scroll"><table><thead><tr><th>Worker</th><th>Job</th><th>Status</th><th>Updated</th></tr></thead><tbody id="hiredBody"></tbody></table></div>
+  </section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showSkeletons, hideSkeletons, showToast, timeAgo } from "./js/dashboard.js";
+
+async function loadPage() {
+  const shell = await initDashboard("employer", "Hired Workers");
+  if (!shell) return;
+  const body = document.getElementById("hiredBody");
+  showSkeletons(body, 6);
+
+  try {
+    const jobsRes = await db.listDocuments(DB_ID, "jobs", [Query.equal("employerId", shell.user.$id), Query.limit(300)]);
+    const jobs = jobsRes.documents;
+    const jobIds = jobs.map((job) => job.$id);
+    if (!jobIds.length) {
+      hideSkeletons(body);
+      body.innerHTML = `<tr><td colspan="4" style="color:var(--text-muted)">No hires yet.</td></tr>`;
+      return;
+    }
+
+    const appsRes = await db.listDocuments(DB_ID, "applications", [Query.equal("jobId", jobIds), Query.limit(500)]);
+    const hired = appsRes.documents.filter((a) => ["accepted", "completed"].includes(a.status || ""));
+    const workerIds = [...new Set(hired.map((a) => a.workerId).filter(Boolean))];
+    const workersRes = workerIds.length ? await db.listDocuments(DB_ID, "workers", [Query.equal("userId", workerIds), Query.limit(500)]) : { documents: [] };
+
+    const workerMap = new Map(workersRes.documents.map((w) => [w.userId, w]));
+    const jobMap = new Map(jobs.map((j) => [j.$id, j]));
+
+    hideSkeletons(body);
+    if (!hired.length) {
+      body.innerHTML = `<tr><td colspan="4" style="color:var(--text-muted)">No accepted hires yet.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = hired.map((app) => `
+      <tr>
+        <td>${workerMap.get(app.workerId)?.name || "Worker"}</td>
+        <td>${jobMap.get(app.jobId)?.title || "Job"}</td>
+        <td><span class="badge badge-success"><span class="badge-dot"></span>${app.status}</span></td>
+        <td>${timeAgo(app.$updatedAt || app.$createdAt)}</td>
+      </tr>
+    `).join("");
+  } catch {
+    hideSkeletons(body);
+    body.innerHTML = `<tr><td colspan="4" style="color:var(--danger)">Could not load hired workers.</td></tr>`;
+    showToast("Unable to fetch hired workers.", "error");
+  }
+}
+
+loadPage();
+</script>
+</body></html>

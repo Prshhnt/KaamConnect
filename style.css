@@ -90,18 +90,16 @@ img {
 }
 
 .page-enter {
-  animation: slideIn 0.3s ease;
+  animation: fadeIn 0.2s ease;
 }
 
-@keyframes slideIn {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateX(20px);
   }
 
   to {
     opacity: 1;
-    transform: translateX(0);
   }
 }
 
@@ -120,16 +118,12 @@ img {
   border: 1px solid var(--border);
   box-shadow: var(--shadow-card);
   padding: 20px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-}
-
-.card:active {
-  transform: scale(0.98);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
 }
 
 .touch-target {
@@ -150,11 +144,73 @@ img {
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.btn:active {
-  transform: scale(0.96);
+.dashboard-shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.dashboard-sidebar {
+  display: none;
+}
+
+.dashboard-content {
+  display: grid;
+  gap: 14px;
+}
+
+.dashboard-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+}
+
+.dashboard-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  padding: 8px 12px;
+  background: #fff;
+}
+
+.dashboard-user-chip img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-shell {
+    grid-template-columns: 250px 1fr;
+    align-items: start;
+  }
+
+  .dashboard-sidebar {
+    display: block;
+    position: sticky;
+    top: 90px;
+  }
+
+  .dashboard-sidebar .card {
+    padding: 14px;
+  }
+
+  .dashboard-sidebar .drawer-link {
+    min-height: 46px;
+  }
+
+  .bottom-nav {
+    display: none;
+  }
 }
 
 .btn-primary {
@@ -627,6 +683,37 @@ textarea:focus {
 
 .auth-title {
   text-align: center;
+}
+
+.auth-subtitle {
+  text-align: center;
+  color: var(--text-body);
+  margin-top: -8px;
+}
+
+.auth-header-card {
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-section));
+}
+
+.auth-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-actions .btn {
+  width: 100%;
+}
+
+.auth-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.auth-meta p {
+  color: var(--text-body);
 }
 
 .role-cards {

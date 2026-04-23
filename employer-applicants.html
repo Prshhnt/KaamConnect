@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Applicants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="data-table-wrapper">
+    <div class="data-table-header"><div class="data-table-title">Applicant Pipeline</div></div>
+    <div style="padding:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-outline" data-filter="all">All</button>
+      <button class="btn btn-outline" data-filter="pending">Pending</button>
+      <button class="btn btn-outline" data-filter="accepted">Accepted</button>
+      <button class="btn btn-outline" data-filter="rejected">Rejected</button>
+    </div>
+    <div class="table-scroll"><table><thead><tr><th>Worker</th><th>Job</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead><tbody id="appsBody"></tbody></table></div>
+  </section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showSkeletons, hideSkeletons, showToast, timeAgo } from "./js/dashboard.js";
+
+let rows = [];
+const statusClass = { pending: "badge-warning", accepted: "badge-success", rejected: "badge-danger", completed: "badge-info", withdrawn: "badge-neutral" };
+
+function render(filter = "all") {
+  const body = document.getElementById("appsBody");
+  const filtered = rows.filter((item) => filter === "all" || item.app.status === filter);
+  if (!filtered.length) {
+    body.innerHTML = `<tr><td colspan="5" style="color:var(--text-muted)">No applicants in this state.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = filtered.map(({ app, worker, job }) => `
+    <tr>
+      <td>${worker?.name || "Worker"}</td>
+      <td>${job?.title || "Job"}</td>
+      <td>${timeAgo(app.$createdAt)}</td>
+      <td><span class="badge ${statusClass[app.status] || "badge-neutral"}"><span class="badge-dot"></span>${app.status || "pending"}</span></td>
+      <td>
+        <button class="btn btn-outline" data-update="accepted" data-id="${app.$id}">Accept</button>
+        <button class="btn btn-outline" data-update="rejected" data-id="${app.$id}">Reject</button>
+      </td>
+    </tr>
+  `).join("");
+
+  body.querySelectorAll("[data-update]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      const status = btn.getAttribute("data-update");
+      btn.classList.add("btn-loading");
+      try {
+        await db.updateDocument(DB_ID, "applications", id, { status });
+        rows = rows.map((item) => item.app.$id === id ? { ...item, app: { ...item.app, status } } : item);
+        render(filter);
+        showToast(`Applicant ${status}`);
+      } catch {
+        showToast("Could not update applicant status.", "error");
+      } finally {
+        btn.classList.remove("btn-loading");
+      }
+    });
+  });
+}
+
+async function loadPage() {
+  const shell = await initDashboard("employer", "Applicants");
+  if (!shell) return;
+  const body = document.getElementById("appsBody");
+  showSkeletons(body, 6);
+
+  try {
+    const jobsRes = await db.listDocuments(DB_ID, "jobs", [Query.equal("employerId", shell.user.$id), Query.limit(300)]);
+    const jobs = jobsRes.documents;
+    const jobIds = jobs.map((job) => job.$id);
+    if (!jobIds.length) {
+      hideSkeletons(body);
+      body.innerHTML = `<tr><td colspan="5" style="color:var(--text-muted)">No jobs yet, so no applicants yet.</td></tr>`;
+      return;
+    }
+
+    const appsRes = await db.listDocuments(DB_ID, "applications", [Query.equal("jobId", jobIds), Query.orderDesc("$createdAt"), Query.limit(500)]);
+    const workerIds = [...new Set(appsRes.documents.map((app) => app.workerId).filter(Boolean))];
+    const workersRes = workerIds.length
+      ? await db.listDocuments(DB_ID, "workers", [Query.equal("userId", workerIds), Query.limit(500)])
+      : { documents: [] };
+
+    const workers = new Map(workersRes.documents.map((w) => [w.userId, w]));
+    const jobMap = new Map(jobs.map((j) => [j.$id, j]));
+    rows = appsRes.documents.map((app) => ({ app, worker: workers.get(app.workerId), job: jobMap.get(app.jobId) }));
+
+    hideSkeletons(body);
+    render("all");
+  } catch {
+    hideSkeletons(body);
+    body.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">Unable to load applicants right now.</td></tr>`;
+    showToast("Could not fetch applicants.", "error");
+  }
+
+  document.querySelectorAll("[data-filter]").forEach((btn) => btn.addEventListener("click", () => render(btn.getAttribute("data-filter"))));
+}
+
+loadPage();
+</script>
+</body></html>

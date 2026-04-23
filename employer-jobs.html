@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Employer Jobs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="data-table-wrapper">
+    <div class="data-table-header"><div class="data-table-title">My Job Listings</div><a class="section-action" href="employer-post-job.html">Post new</a></div>
+    <div class="table-scroll"><table><thead><tr><th>Title</th><th>City</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead><tbody id="jobsBody"></tbody></table></div>
+  </section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showSkeletons, hideSkeletons, showToast, showConfirm, timeAgo } from "./js/dashboard.js";
+
+const statusClass = { open: "badge-success", paused: "badge-warning", closed: "badge-neutral" };
+
+async function loadPage() {
+  const shell = await initDashboard("employer", "My Jobs");
+  if (!shell) return;
+  const body = document.getElementById("jobsBody");
+  showSkeletons(body, 5);
+
+  try {
+    const jobsRes = await db.listDocuments(DB_ID, "jobs", [Query.equal("employerId", shell.user.$id), Query.orderDesc("$createdAt"), Query.limit(200)]);
+    const jobs = jobsRes.documents;
+    hideSkeletons(body);
+
+    if (!jobs.length) {
+      body.innerHTML = `<tr><td colspan="5" style="color:var(--text-muted)">No jobs posted yet.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = jobs.map((job) => `
+      <tr>
+        <td>${job.title}</td>
+        <td>${job.city || "-"}</td>
+        <td><span class="badge ${statusClass[job.status] || "badge-neutral"}"><span class="badge-dot"></span>${job.status || "open"}</span></td>
+        <td>${timeAgo(job.$createdAt)}</td>
+        <td>
+          <button class="btn btn-outline" data-toggle="${job.$id}" data-status="${job.status || "open"}">${(job.status || "open") === "open" ? "Close" : "Reopen"}</button>
+          <button class="btn btn-outline" data-delete="${job.$id}">Delete</button>
+        </td>
+      </tr>`).join("");
+
+    body.querySelectorAll("[data-toggle]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-toggle");
+        const curr = btn.getAttribute("data-status") || "open";
+        const next = curr === "open" ? "closed" : "open";
+        try {
+          await db.updateDocument(DB_ID, "jobs", id, { status: next });
+          showToast(`Job marked ${next}`);
+          loadPage();
+        } catch {
+          showToast("Could not update job status.", "error");
+        }
+      });
+    });
+
+    body.querySelectorAll("[data-delete]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-delete");
+        showConfirm("Delete Job", "This removes the job listing permanently.", async () => {
+          await db.deleteDocument(DB_ID, "jobs", id);
+          showToast("Job deleted", "warning");
+          loadPage();
+        });
+      });
+    });
+  } catch {
+    hideSkeletons(body);
+    body.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">Could not load jobs right now.</td></tr>`;
+    showToast("Unable to fetch jobs.", "error");
+  }
+}
+
+loadPage();
+</script>
+</body></html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Collections - KaamConnect Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .collections-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .collection-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            font-size: 14px;
+        }
+
+        .collection-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .collection-icon {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .console {
+            background: #1e1e1e;
+            color: #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .console.active {
+            display: block;
+        }
+
+        .console-line {
+            margin-bottom: 4px;
+        }
+
+        .console-success {
+            color: #4ade80;
+        }
+
+        .console-error {
+            color: #ff6b6b;
+        }
+
+        .console-info {
+            color: #60a5fa;
+        }
+
+        .console-warning {
+            color: #fbbf24;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .status.active {
+            display: block;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #7f1d1d;
+            border: 1px solid #fca5a5;
+        }
+
+        .next-steps {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .next-steps.active {
+            display: block;
+        }
+
+        .next-steps h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .next-steps ol {
+            margin-left: 20px;
+            color: #333;
+        }
+
+        .next-steps li {
+            margin-bottom: 8px;
+        }
+
+        .next-steps a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .next-steps a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Create Collections</h1>
+        <p class="subtitle">Set up database collections for KaamConnect</p>
+
+        <div class="collections-list">
+            <div class="collection-item">
+                <span class="collection-icon">👥</span>
+                <span><code>workers</code> - Skilled workers profile data</span>
+            </div>
+            <div class="collection-item">
+                <span class="collection-icon">💼</span>
+                <span><code>jobs</code> - Job listings and requests</span>
+            </div>
+            <div class="collection-item">
+                <span class="collection-icon">📋</span>
+                <span><code>applications</code> - Worker applications for jobs</span>
+            </div>
+            <div class="collection-item">
+                <span class="collection-icon">⭐</span>
+                <span><code>reviews</code> - Reviews and ratings</span>
+            </div>
+            <div class="collection-item">
+                <span class="collection-icon">🏙️</span>
+                <span><code>cities</code> - City reference data</span>
+            </div>
+            <div class="collection-item">
+                <span class="collection-icon">🏷️</span>
+                <span><code>categories</code> - Work categories/skills</span>
+            </div>
+        </div>
+
+        <button class="btn" onclick="createCollections()">Create Collections</button>
+
+        <div class="console" id="console"></div>
+
+        <div class="status" id="status"></div>
+
+        <div class="next-steps" id="nextSteps">
+            <h3>✅ Next Steps</h3>
+            <ol>
+                <li>Visit <a href="./setup.html" target="_blank">setup.html</a> to populate collections with sample data</li>
+                <li>Test the app:
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li><a href="./search.html" target="_blank">Search page</a> - See workers and jobs</li>
+                        <li><a href="./worker-dashboard.html" target="_blank">Worker dashboard</a> - See job matches</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1/dist/appwrite.min.js"></script>
+    <script type="module">
+        import { Client, Databases, ID } from 'https://cdn.jsdelivr.net/npm/appwrite@14.0.1/dist/appwrite.min.js';
+
+        const client = new Client()
+            .setEndpoint('https://sgp.cloud.appwrite.io/v1')
+            .setProject('69d7693c0026a410e676');
+
+        const databases = new Databases(client);
+        const DATABASE_ID = '69e9749100232561665e';
+
+        const collectionsToCreate = [
+            { id: 'workers', name: 'Workers' },
+            { id: 'jobs', name: 'Jobs' },
+            { id: 'applications', name: 'Applications' },
+            { id: 'reviews', name: 'Reviews' },
+            { id: 'cities', name: 'Cities' },
+            { id: 'categories', name: 'Categories' }
+        ];
+
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            console.classList.add('active');
+
+            const line = document.createElement('div');
+            line.className = `console-line console-${type}`;
+            line.textContent = message;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        async function createCollections() {
+            const btn = event.target;
+            btn.disabled = true;
+
+            log('🚀 Starting collection creation...', 'info');
+            log('', 'info');
+
+            let created = 0;
+            let failed = 0;
+
+            for (const collection of collectionsToCreate) {
+                try {
+                    log(`📝 Creating collection: ${collection.name} (${collection.id})...`, 'info');
+
+                    await databases.createCollection(
+                        DATABASE_ID,
+                        collection.id,
+                        collection.name,
+                        [
+                            'create("any")',
+                            'read("any")',
+                            'update("any")',
+                            'delete("any")'
+                        ]
+                    );
+
+                    log(`  ✅ Collection "${collection.name}" created successfully`, 'success');
+                    created++;
+                } catch (error) {
+                    if (error.code === 409 || error.message.includes('already exists')) {
+                        log(`  ⚠️  Collection "${collection.name}" already exists (skipped)`, 'warning');
+                        created++;
+                    } else {
+                        log(`  ❌ Failed to create "${collection.name}": ${error.message}`, 'error');
+                        failed++;
+                    }
+                }
+            }
+
+            log('', 'info');
+            log(`🎉 Setup complete: ${created}/6 collections ready, ${failed} errors`, 'success');
+
+            // Show status
+            const status = document.getElementById('status');
+            if (failed === 0) {
+                status.className = 'status active status-success';
+                status.innerHTML = '<strong>✅ Success!</strong><br>All collections created. You can now populate them with data.';
+                document.getElementById('nextSteps').classList.add('active');
+            } else {
+                status.className = 'status active status-error';
+                status.innerHTML = `<strong>⚠️ Partial Success</strong><br>${created}/6 collections ready. Check the log above for details.`;
+            }
+
+            btn.disabled = false;
+        }
+
+        // Expose to window for console access
+        window.createCollections = createCollections;
+    </script>
+</body>
+</html>

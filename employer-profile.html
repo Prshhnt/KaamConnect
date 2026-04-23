@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Employer Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="data-table-wrapper" style="padding:20px;max-width:920px">
+    <h2 class="section-title" style="margin-bottom:12px">Company Profile</h2>
+    <form id="profileForm" class="page-grid">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <input class="form-control" id="name" placeholder="Company name" required />
+        <input class="form-control" id="phone" placeholder="Contact number" />
+        <input class="form-control" id="city" placeholder="City" />
+        <input class="form-control" id="website" placeholder="Website" />
+      </div>
+      <textarea class="form-control" id="description" rows="5" placeholder="Company description"></textarea>
+      <button class="btn btn-primary" type="submit" id="saveBtn">Save Profile</button>
+    </form>
+  </section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showToast } from "./js/dashboard.js";
+
+let shellData;
+
+function fill(profile) {
+  ["name", "phone", "city", "website", "description"].forEach((id) => {
+    document.getElementById(id).value = profile?.[id] ?? "";
+  });
+}
+
+async function loadPage() {
+  shellData = await initDashboard("employer", "My Profile");
+  if (!shellData) return;
+  fill(shellData.profile || {});
+
+  document.getElementById("profileForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const btn = document.getElementById("saveBtn");
+    btn.classList.add("btn-loading");
+
+    const payload = {
+      name: document.getElementById("name").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      city: document.getElementById("city").value.trim(),
+      website: document.getElementById("website").value.trim(),
+      description: document.getElementById("description").value.trim()
+    };
+
+    try {
+      if (shellData.profile?.$id) {
+        await db.updateDocument(DB_ID, "employers", shellData.profile.$id, payload);
+      }
+      showToast("Profile saved successfully");
+    } catch {
+      showToast("Could not update profile.", "error");
+    } finally {
+      btn.classList.remove("btn-loading");
+    }
+  });
+}
+
+loadPage();
+</script>
+</body></html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Employer Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="data-table-wrapper" style="padding:20px;max-width:920px">
+    <h2 class="section-title">Notification Preferences</h2>
+    <form id="settingsForm" class="page-grid" style="margin-top:12px">
+      <label class="worker-card-mini"><input id="notifApplicants" type="checkbox" /> New applicant alerts</label>
+      <label class="worker-card-mini"><input id="notifStatus" type="checkbox" /> Hiring status updates</label>
+      <label class="worker-card-mini"><input id="notifReviews" type="checkbox" /> Review notifications</label>
+      <button class="btn btn-primary" type="submit">Save Settings</button>
+    </form>
+  </section>
+  <section class="data-table-wrapper" style="padding:20px;max-width:920px;margin-top:16px" id="help">
+    <h2 class="section-title">Account Actions</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+      <button class="btn btn-outline" id="logoutBtn">Log Out</button>
+      <button class="btn btn-danger" id="deleteBtn">Delete Current Session</button>
+    </div>
+  </section>
+</main>
+<script type="module">
+import { account } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showToast, showConfirm } from "./js/dashboard.js";
+
+async function loadPage() {
+  const shell = await initDashboard("employer", "Settings");
+  if (!shell) return;
+
+  const key = `employer-settings-${shell.user.$id}`;
+  const settings = JSON.parse(localStorage.getItem(key) || "{}");
+  document.getElementById("notifApplicants").checked = settings.notifApplicants !== false;
+  document.getElementById("notifStatus").checked = settings.notifStatus !== false;
+  document.getElementById("notifReviews").checked = settings.notifReviews !== false;
+
+  document.getElementById("settingsForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    localStorage.setItem(key, JSON.stringify({
+      notifApplicants: document.getElementById("notifApplicants").checked,
+      notifStatus: document.getElementById("notifStatus").checked,
+      notifReviews: document.getElementById("notifReviews").checked
+    }));
+    showToast("Settings saved");
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await account.deleteSession("current");
+    location.href = "login.html";
+  });
+
+  document.getElementById("deleteBtn").addEventListener("click", () => {
+    showConfirm("Delete Current Session", "This will log you out from this device.", async () => {
+      await account.deleteSession("current");
+      location.href = "login.html";
+    });
+  });
+}
+
+loadPage();
+</script>
+</body></html>

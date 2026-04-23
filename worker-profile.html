@@ -1,159 +1,94 @@
-<!DOCTYPE html>
-<html lang="en" class="page-enter">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Worker Profile - KaamConnect</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <main class="container section">
-    <div class="top-bar">
-      <button class="btn btn-outline touch-target" onclick="history.back()"><i class="ph ph-arrow-left"></i> Back</button>
-      <div></div>
-      <button class="btn btn-outline touch-target" id="shareBtn"><i class="ph ph-share-network"></i> Share</button>
-    </div>
-
-    <section class="card profile-hero">
-      <img class="profile-avatar" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=220&q=60" alt="Ramesh Kumar">
-      <h1>Ramesh Kumar</h1>
-      <p><i class="ph ph-flashlight"></i> Electrician</p>
-      <p><i class="ph ph-map-pin"></i> Lajpat Nagar, DL</p>
-      <p style="color:var(--success)"><i class="ph ph-circle-fill"></i> Available Now</p>
-      <p><i class="ph ph-star"></i> 4.9 (47 reviews)</p>
-    </section>
-
-    <section class="card" style="margin-top:12px">
-      <p><i class="ph ph-currency-inr"></i> ₹600 per day</p>
-      <p><i class="ph ph-trophy"></i> 8 years experience</p>
-      <p><i class="ph ph-chat-circle-text"></i> Hindi, English</p>
-    </section>
-
-    <section class="card" style="margin-top:12px">
-      <h2>About</h2>
-      <p style="margin-top:8px">Expert in home wiring, AC repair, switchboard fitting. Reliable and on time.</p>
-    </section>
-
-    <section class="card" style="margin-top:12px">
-      <h2>Skills</h2>
-      <div class="skill-wrap" style="margin-top:8px">
-        <span class="skill-tag">Home Wiring</span>
-        <span class="skill-tag">AC Repair</span>
-        <span class="skill-tag">Switchboard</span>
-        <span class="skill-tag">Solar Panel</span>
-        <span class="skill-tag">Ceiling Fan</span>
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | My Worker Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="data-table-wrapper" style="padding:18px">
+    <h2 class="section-title" style="margin-bottom:12px">Profile Details</h2>
+    <form id="profileForm" class="page-grid" style="max-width:900px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <input class="form-control" id="name" placeholder="Full Name" required />
+        <input class="form-control" id="phone" placeholder="Phone" required />
+        <input class="form-control" id="city" placeholder="City" />
+        <input class="form-control" id="category" placeholder="Category" />
+        <input class="form-control" id="experience" placeholder="Experience (years)" type="number" min="0" step="1" />
+        <input class="form-control" id="hourlyRate" placeholder="Hourly rate" type="number" min="0" step="1" />
       </div>
-    </section>
+      <textarea class="form-control" id="skills" rows="2" placeholder="Skills (comma separated)"></textarea>
+      <textarea class="form-control" id="bio" rows="4" placeholder="Short bio"></textarea>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" type="submit" id="saveBtn">Save Profile</button>
+        <a class="btn btn-outline" href="worker-profile-public.html">Preview Public Profile</a>
+      </div>
+    </form>
+  </section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showToast } from "./js/dashboard.js";
 
-    <section class="card" style="margin-top:12px">
-      <h2>Reviews (47)</h2>
-      <article class="card" style="margin-top:8px">
-        <p><i class="ph ph-star"></i> Sharma Family · 2 days ago</p>
-        <p>Very good work and on time.</p>
-      </article>
-      <article class="card" style="margin-top:8px">
-        <p><i class="ph ph-star"></i> Gupta Home · 4 days ago</p>
-        <p>Clean work and friendly behavior.</p>
-      </article>
-    </section>
+let shellData;
 
-    <div class="sticky-action">
-      <button class="btn btn-primary touch-target" id="hireBtn" style="width:100%"><i class="ph ph-handshake"></i> Hire Ramesh Kumar</button>
-    </div>
-  </main>
+function fillForm(profile) {
+  ["name", "phone", "city", "category", "experience", "hourlyRate"].forEach((id) => {
+    document.getElementById(id).value = profile?.[id] ?? "";
+  });
+  document.getElementById("hourlyRate").value = profile?.rate ?? profile?.hourlyRate ?? "";
+  document.getElementById("bio").value = profile?.about || profile?.bio || "";
+  const skills = Array.isArray(profile?.skills) ? profile.skills.join(", ") : (profile?.skills || "");
+  document.getElementById("skills").value = skills;
+}
 
-  <script type="module">
-    import { initCommonUI, showToast, showSuccessOverlay, categoryMeta, showEmptyState } from "./main.js";
-    import { fetchWorkerById, fetchReviewsForWorker, createApplication } from "./appwrite.js";
+function normalizeSkills(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join(", ")
+    .slice(0, 255);
+}
 
-    const workerId = new URLSearchParams(location.search).get("id");
-    let currentWorker = null;
-    let reviews = [];
+async function loadPage() {
+  shellData = await initDashboard("worker", "My Profile");
+  if (!shellData) return;
+  fillForm(shellData.profile || {});
 
-    async function loadWorkerProfile() {
-      try {
-        if (!workerId) {
-          showEmptyState({
-            container: document.body,
-            title: "Worker not found",
-            message: "Invalid worker ID"
-          });
-          return;
-        }
+  document.getElementById("profileForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const saveBtn = document.getElementById("saveBtn");
+    saveBtn.classList.add("btn-loading");
 
-        currentWorker = await fetchWorkerById(workerId);
-        if (!currentWorker) {
-          showEmptyState({
-            container: document.body,
-            title: "Worker not found",
-            message: "This worker profile is no longer available"
-          });
-          return;
-        }
+    const payload = {
+      name: document.getElementById("name").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      city: document.getElementById("city").value.trim(),
+      category: document.getElementById("category").value.trim(),
+      experience: Number(document.getElementById("experience").value || 0),
+      rate: Number(document.getElementById("hourlyRate").value || 0),
+      about: document.getElementById("bio").value.trim(),
+      skills: normalizeSkills(document.getElementById("skills").value)
+    };
 
-        reviews = await fetchReviewsForWorker(workerId);
-        renderProfile();
-      } catch (error) {
-        console.error("Failed to load profile:", error);
-        showEmptyState({
-          container: document.body,
-          title: "Error loading profile",
-          message: "Please check your connection"
-        });
+    try {
+      if (shellData.profile?.$id) {
+        await db.updateDocument(DB_ID, "workers", shellData.profile.$id, payload);
       }
+      showToast("Profile updated successfully");
+    } catch {
+      showToast("Could not update profile.", "error");
+    } finally {
+      saveBtn.classList.remove("btn-loading");
     }
+  });
+}
 
-    function renderProfile() {
-      const category = categoryMeta[currentWorker.category] || categoryMeta.other;
-      
-      // Update profile hero section
-      document.querySelector(".profile-avatar").src = currentWorker.photo || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=220&q=60";
-      document.querySelector(".profile-avatar").alt = currentWorker.name;
-      
-      const profileHero = document.querySelector(".profile-hero");
-      profileHero.innerHTML = `
-        <img class="profile-avatar" src="${currentWorker.photo || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=220&q=60"}" alt="${currentWorker.name}">
-        <h1>${currentWorker.name}</h1>
-        <p><i class="${category.icon}"></i> ${category.label}</p>
-        <p><i class="ph ph-map-pin"></i> ${currentWorker.city}</p>
-        <p style="color:${currentWorker.available ? 'var(--success)' : 'var(--danger)'}"><i class="ph ph-circle-fill"></i> ${currentWorker.available ? 'Available Now' : 'Busy'}</p>
-        <p><i class="ph ph-star"></i> ${currentWorker.rating || 0} (${currentWorker.reviewsCount || reviews.length} reviews)</p>
-      `;
-
-      // Update details section
-      document.querySelectorAll(".profile-hero")[0].nextElementSibling.innerHTML = `
-        <p><i class="ph ph-currency-inr"></i> ₹${currentWorker.rate || 0} per day</p>
-        <p><i class="ph ph-trophy"></i> ${currentWorker.experience || 0} years experience</p>
-        <p><i class="ph ph-chat-circle-text"></i> ${currentWorker.languages || 'Hindi, English'}</p>
-      `;
-
-      // Update hire button
-      const hireBtn = document.getElementById("hireBtn");
-      hireBtn.textContent = `Hire ${currentWorker.name}`;
-    }
-
-    document.getElementById("shareBtn").addEventListener("click", async () => {
-      const url = window.location.href;
-      try {
-        await navigator.clipboard.writeText(url);
-        showToast("Copied!", "success");
-      } catch {
-        showToast("Could not copy link", "error");
-      }
-    });
-
-    document.getElementById("hireBtn").addEventListener("click", async () => {
-      showSuccessOverlay("Request Sent!");
-      showToast("Worker will contact you soon.", "success");
-    });
-
-    // Load profile on page load
-    loadWorkerProfile();
-    initCommonUI();
-  </script>
-</body>
-</html>
+loadPage();
+</script>
+</body></html>

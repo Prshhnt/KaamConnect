@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Post Job</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="data-table-wrapper" style="padding:20px;max-width:980px">
+    <h2 class="section-title" style="margin-bottom:12px">Create Job Listing</h2>
+    <form id="jobForm" class="page-grid">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <input class="form-control" id="title" placeholder="Job title" required />
+        <input class="form-control" id="category" placeholder="Category" required />
+        <input class="form-control" id="city" placeholder="City" required />
+        <input class="form-control" id="wage" type="number" min="0" placeholder="Pay amount" required />
+      </div>
+      <textarea class="form-control" id="description" rows="5" placeholder="Describe responsibilities, timing, and requirements" required></textarea>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn btn-primary" type="submit" id="createBtn">Publish Job</button>
+        <a href="employer-jobs.html" class="btn btn-outline">Manage Jobs</a>
+      </div>
+    </form>
+  </section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showToast } from "./js/dashboard.js";
+
+async function loadPage() {
+  const shell = await initDashboard("employer", "Post a Job");
+  if (!shell) return;
+
+  document.getElementById("jobForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const btn = document.getElementById("createBtn");
+    btn.classList.add("btn-loading");
+    const payload = {
+      employerId: shell.user.$id,
+      title: document.getElementById("title").value.trim(),
+      category: document.getElementById("category").value.trim(),
+      city: document.getElementById("city").value.trim(),
+      wage: Number(document.getElementById("wage").value || 0),
+      description: document.getElementById("description").value.trim(),
+      status: "open"
+    };
+
+    try {
+      await db.createDocument(DB_ID, "jobs", ID.unique(), payload);
+      showToast("Job published successfully");
+      event.target.reset();
+    } catch {
+      showToast("Could not publish job right now.", "error");
+    } finally {
+      btn.classList.remove("btn-loading");
+    }
+  });
+}
+
+loadPage();
+</script>
+</body></html>

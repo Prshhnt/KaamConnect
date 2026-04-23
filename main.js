@@ -15,6 +15,42 @@ const categoryMeta = {
   other: { icon: "ph ph-toolbox", label: "Other", color: "#F5F5F4", accent: "#44403C" }
 };
 
+const categoryLabelMap = {
+  en: {
+    electrician: "Electrician",
+    plumber: "Plumber",
+    carpenter: "Carpenter",
+    maid: "Maid",
+    mechanic: "Mechanic",
+    painter: "Painter",
+    mason: "Mason",
+    driver: "Driver",
+    cook: "Cook",
+    welder: "Welder",
+    labour: "Labour",
+    other: "Other"
+  },
+  hi: {
+    electrician: "इलेक्ट्रीशियन",
+    plumber: "प्लंबर",
+    carpenter: "बढ़ई",
+    maid: "मेड",
+    mechanic: "मैकेनिक",
+    painter: "पेंटर",
+    mason: "राजमिस्त्री",
+    driver: "ड्राइवर",
+    cook: "रसोइया",
+    welder: "वेल्डर",
+    labour: "मजदूर",
+    other: "अन्य"
+  }
+};
+
+function getCategoryLabel(categoryKey) {
+  const lang = getCurrentLanguage();
+  return categoryLabelMap[lang]?.[categoryKey] || categoryLabelMap.en[categoryKey] || categoryMeta.other.label;
+}
+
 function formatCurrency(value) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -134,8 +170,12 @@ function showError({ container, message = "Something went wrong. Please try agai
 
 function renderWorkerCard(worker) {
   const category = categoryMeta[worker.category] || categoryMeta.other;
+  const categoryLabel = getCategoryLabel(worker.category || "other");
   const statusClass = worker.available ? "available" : "busy";
-  const statusLabel = worker.available ? "Available" : "Busy";
+  const statusLabel = getCurrentLanguage() === "hi" ? (worker.available ? "उपलब्ध" : "व्यस्त") : (worker.available ? "Available" : "Busy");
+  const reviewsCount = Number(worker.reviewsCount || worker.reviews || 0);
+  const ratingValue = Number(worker.rating || 0).toFixed(1);
+  const yearsLabel = getCurrentLanguage() === "hi" ? "साल अनुभव" : "years experience";
 
   return `
     <article class="worker-card card list-item" style="--card-accent:${category.accent}">
@@ -146,31 +186,32 @@ function renderWorkerCard(worker) {
             <h4>${worker.name}</h4>
             <span class="status-pill ${statusClass}"><span class="status-dot ${statusClass}"></span>${statusLabel}</span>
           </div>
-          <p><i class="${category.icon}"></i> ${category.label} · ${worker.distance ? `<i class="ph ph-map-pin"></i> ${worker.distance} km away` : worker.city}</p>
-          <p><i class="ph ph-star"></i> ${worker.rating} (${worker.reviews} reviews)</p>
-          <p><i class="ph ph-currency-inr"></i> ${formatCurrency(worker.rate)}/day · ${worker.experience} years experience</p>
+          <p><i class="${category.icon}"></i> ${categoryLabel} · ${worker.distance ? `<i class="ph ph-map-pin"></i> ${worker.distance} km away` : (worker.city || "-")}</p>
+          <p><i class="ph ph-star"></i> ${ratingValue} (${reviewsCount} ${getCurrentLanguage() === "hi" ? "रिव्यू" : "reviews"})</p>
+          <p><i class="ph ph-currency-inr"></i> ${formatCurrency(worker.rate)}/day · ${worker.experience || 0} ${yearsLabel}</p>
         </div>
       </div>
       <div class="worker-actions">
-        <a href="tel:${worker.phone || ""}" class="btn btn-primary touch-target"><i class="ph ph-phone"></i> Contact</a>
-        <a href="worker-profile.html?id=${worker.id}" class="btn btn-outline touch-target"><i class="ph ph-eye"></i> View Profile</a>
+        <a href="tel:${worker.phone || ""}" class="btn btn-primary touch-target"><i class="ph ph-phone"></i> ${getCurrentLanguage() === "hi" ? "संपर्क" : "Contact"}</a>
+        <a href="worker-profile.html?id=${worker.$id || worker.id}" class="btn btn-outline touch-target"><i class="ph ph-eye"></i> ${getCurrentLanguage() === "hi" ? "प्रोफाइल देखें" : "View Profile"}</a>
       </div>
     </article>
   `;
 }
 
 function renderJobCard(job) {
+  const locationLabel = job.location || job.city || "-";
   return `
     <article class="job-card card list-item">
       <div class="job-top">
         <h4>${job.title}</h4>
         <span class="badge ${job.status || "pending"}">${String(job.status || "pending").toUpperCase()}</span>
       </div>
-      <p><i class="ph ph-map-pin"></i> ${job.location} · ${formatCurrency(job.rate)}/day</p>
+      <p><i class="ph ph-map-pin"></i> ${locationLabel} · ${formatCurrency(job.rate)}/day</p>
       <p><i class="ph ph-clock"></i> ${job.duration} · Posted ${getRelativeDateLabel(job.createdAt)}</p>
       <div class="worker-actions">
-        <button class="btn btn-outline touch-target" data-job-view="${job.id}"><i class="ph ph-eye"></i> View</button>
-        <button class="btn btn-primary touch-target" data-job-apply="${job.id}"><i class="ph ph-paper-plane-tilt"></i> Apply</button>
+        <button class="btn btn-outline touch-target" data-job-view="${job.$id || job.id}"><i class="ph ph-eye"></i> ${getCurrentLanguage() === "hi" ? "देखें" : "View"}</button>
+        <button class="btn btn-primary touch-target" data-job-apply="${job.$id || job.id}"><i class="ph ph-paper-plane-tilt"></i> ${getCurrentLanguage() === "hi" ? "आवेदन" : "Apply"}</button>
       </div>
     </article>
   `;
@@ -398,6 +439,7 @@ async function initCommonUI() {
 
 export {
   categoryMeta,
+  getCategoryLabel,
   formatCurrency,
   showToast,
   showLoading,

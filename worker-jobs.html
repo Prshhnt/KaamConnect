@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Browse Jobs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <div class="data-table-wrapper" style="padding:14px">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px">
+      <input id="searchInput" class="form-control" placeholder="Search by title or skill" />
+      <select id="cityFilter" class="form-control"><option value="">All cities</option></select>
+      <select id="catFilter" class="form-control"><option value="">All categories</option></select>
+      <button id="refreshBtn" class="btn btn-outline">Refresh</button>
+    </div>
+  </div>
+  <section id="jobsGrid" class="dashboard-cards" style="margin-top:16px"></section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showSkeletons, hideSkeletons, showToast, formatINR, timeAgo } from "./js/dashboard.js";
+
+let shellData; let jobs = []; let applications = [];
+
+function fillFilters() {
+  const cities = [...new Set(jobs.map((j) => j.city).filter(Boolean))].sort();
+  const cats = [...new Set(jobs.map((j) => j.category).filter(Boolean))].sort();
+  document.getElementById("cityFilter").innerHTML = `<option value="">All cities</option>${cities.map((c)=>`<option value="${c}">${c}</option>`).join("")}`;
+  document.getElementById("catFilter").innerHTML = `<option value="">All categories</option>${cats.map((c)=>`<option value="${c}">${c}</option>`).join("")}`;
+}
+
+function render() {
+  const wrap = document.getElementById("jobsGrid");
+  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  const city = document.getElementById("cityFilter").value;
+  const cat = document.getElementById("catFilter").value;
+  const applied = new Set(applications.map((a) => a.jobId));
+
+  const filtered = jobs.filter((job) => (job.status || "open") === "open")
+    .filter((job) => !city || job.city === city)
+    .filter((job) => !cat || job.category === cat)
+    .filter((job) => {
+      const t = `${job.title || ""} ${job.description || ""} ${job.category || ""}`.toLowerCase();
+      return !q || t.includes(q);
+    });
+
+  if (!filtered.length) {
+    wrap.innerHTML = `<article class="job-card-mini">No jobs match your filters right now.</article>`;
+    return;
+  }
+
+  wrap.innerHTML = filtered.map((job) => {
+    const already = applied.has(job.$id);
+    return `<article class="job-card-mini">
+      <h3 style="font-size:16px">${job.title}</h3>
+      <p style="color:var(--text-muted);font-size:13px">${job.city || "-"} • ${job.category || "General"}</p>
+      <p style="margin-top:8px;line-height:1.5">${(job.description || "No description provided").slice(0, 130)}</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <strong>${formatINR(job.wage || job.salary || 0)}</strong>
+        <small style="color:var(--text-muted)">${timeAgo(job.$createdAt)}</small>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn ${already ? "btn-outline" : "btn-primary"}" ${already ? "disabled" : ""} data-apply="${job.$id}">${already ? "Applied" : "Apply"}</button>
+      </div>
+    </article>`;
+  }).join("");
+
+  wrap.querySelectorAll("[data-apply]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const jobId = btn.getAttribute("data-apply");
+      btn.classList.add("btn-loading");
+      try {
+        await db.createDocument(DB_ID, "applications", ID.unique(), {
+          workerId: shellData.user.$id,
+          jobId,
+          status: "pending",
+          appliedAt: new Date().toISOString()
+        });
+        applications.push({ jobId, status: "pending" });
+        render();
+        showToast("Application submitted successfully");
+      } catch {
+        showToast("Could not submit application.", "error");
+      } finally {
+        btn.classList.remove("btn-loading");
+      }
+    });
+  });
+}
+
+async function loadPage() {
+  shellData = await initDashboard("worker", "Browse Jobs");
+  if (!shellData) return;
+  const wrap = document.getElementById("jobsGrid");
+  showSkeletons(wrap, 6);
+
+  try {
+    const [jobsRes, appRes] = await Promise.all([
+      db.listDocuments(DB_ID, "jobs", [Query.orderDesc("$createdAt"), Query.limit(200)]),
+      db.listDocuments(DB_ID, "applications", [Query.equal("workerId", shellData.user.$id), Query.limit(500)])
+    ]);
+    jobs = jobsRes.documents;
+    applications = appRes.documents;
+    hideSkeletons(wrap);
+    fillFilters();
+    render();
+  } catch {
+    hideSkeletons(wrap);
+    wrap.innerHTML = `<article class="job-card-mini" style="color:var(--danger)">Unable to load jobs right now.</article>`;
+    showToast("Could not load jobs.", "error");
+  }
+
+  ["searchInput", "cityFilter", "catFilter"].forEach((id) => document.getElementById(id).addEventListener("input", render));
+  document.getElementById("refreshBtn").addEventListener("click", loadPage);
+}
+
+loadPage();
+</script>
+</body></html>

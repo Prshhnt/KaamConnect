@@ -13,21 +13,26 @@
 <body>
   <main class="container section">
     <div class="top-bar">
-      <button class="btn btn-outline touch-target" onclick="history.back()">← Back</button>
+      <button class="btn btn-outline touch-target" onclick="history.back()">← <span data-i18n="common.back">Back</span></button>
       <div class="search-pill"><i class="ph ph-magnifying-glass"></i><span data-i18n="search.input">Search workers...</span></div>
-      <button class="btn btn-outline touch-target" id="filterBtn">Filter</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="lang-btn touch-target" data-language-switcher>
+          <i class="ph ph-globe"></i> <span class="lang-label" data-lang-label>English</span>
+        </button>
+        <button class="btn btn-outline touch-target" id="filterBtn" data-i18n="search.filter">Filter</button>
+      </div>
     </div>
 
     <div class="tab-toggle" id="modeToggle">
-      <button class="active touch-target" data-mode="workers"><i class="ph ph-hard-hat"></i> Find Workers</button>
-      <button class="touch-target" data-mode="jobs">Find Jobs</button>
+      <button class="active touch-target" data-mode="workers"><i class="ph ph-hard-hat"></i> <span data-i18n="search.findWorkers">Find Workers</span></button>
+      <button class="touch-target" data-mode="jobs"><span data-i18n="search.findJobs">Find Jobs</span></button>
     </div>
 
     <section class="card" id="locationBanner" style="margin-top:12px;background:var(--warning-light)">
-      <h3><i class="ph ph-map-pin"></i> Allow location for better results nearby</h3>
+      <h3><i class="ph ph-map-pin"></i> <span data-i18n="search.locationBanner">Allow location for better results nearby</span></h3>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn btn-primary touch-target" id="allowLocationBtn">Allow Location Access</button>
-        <button class="btn btn-outline touch-target" id="enterCityBtn">Enter City <i class="ph ph-arrow-right"></i></button>
+        <button class="btn btn-primary touch-target" id="allowLocationBtn" data-i18n="search.allowLocation">Allow Location Access</button>
+        <button class="btn btn-outline touch-target" id="enterCityBtn"><span data-i18n="search.enterCity">Enter City</span> <i class="ph ph-arrow-right"></i></button>
       </div>
     </section>
 
@@ -39,33 +44,33 @@
     <div class="sheet-panel">
       <div class="drag-handle"></div>
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <h3>Filter Workers</h3>
+        <h3 data-i18n="search.filterWorkers">Filter Workers</h3>
         <button class="icon-btn touch-target" id="closeFilterBtn"><i class="ph ph-x"></i></button>
       </div>
 
       <div class="range-wrap" style="margin-top:10px">
-        <label><i class="ph ph-map-pin"></i> Distance: <span id="distanceValue">10</span> km</label>
+        <label><i class="ph ph-map-pin"></i> <span data-i18n="search.distance">Distance</span>: <span id="distanceValue">10</span> km</label>
         <input type="range" id="distanceRange" min="1" max="50" value="10" class="touch-target">
       </div>
 
       <div style="margin-top:14px">
-        <label><i class="ph ph-squares-four"></i> Category</label>
+        <label><i class="ph ph-squares-four"></i> <span data-i18n="search.category">Category</span></label>
         <div class="filter-chips" id="categoryChips"></div>
       </div>
 
       <div class="range-wrap" style="margin-top:14px">
-        <label><i class="ph ph-currency-inr"></i> Daily Rate: ₹<span id="rateMin">200</span> - ₹<span id="rateMax">2000</span></label>
+        <label><i class="ph ph-currency-inr"></i> <span data-i18n="search.dailyRate">Daily Rate</span>: ₹<span id="rateMin">200</span> - ₹<span id="rateMax">2000</span></label>
         <input type="range" id="rateMinInput" min="100" max="2500" value="200" step="50" class="touch-target">
         <input type="range" id="rateMaxInput" min="100" max="2500" value="2000" step="50" class="touch-target">
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
-        <label><i class="ph ph-check-circle"></i> Available Only</label>
+        <label><i class="ph ph-check-circle"></i> <span data-i18n="search.availableOnly">Available Only</span></label>
         <button id="availableToggle" class="toggle touch-target active"></button>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
-        <label><i class="ph ph-star"></i> Min Rating</label>
+        <label><i class="ph ph-star"></i> <span data-i18n="search.minRating">Min Rating</span></label>
         <select id="ratingInput" class="input" style="min-height:52px;max-width:150px">
           <option value="0">Any</option>
           <option value="3">3+</option>
@@ -75,14 +80,14 @@
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:16px">
-        <button class="btn btn-outline touch-target" id="clearFiltersBtn">Clear All</button>
-        <button class="btn btn-primary touch-target" id="applyFiltersBtn">Show 0 Results</button>
+        <button class="btn btn-outline touch-target" id="clearFiltersBtn" data-i18n="search.clearAll">Clear All</button>
+        <button class="btn btn-primary touch-target" id="applyFiltersBtn"><span data-i18n="search.showResults">Show Results</span></button>
       </div>
     </div>
   </div>
 
   <script type="module">
-    import { initCommonUI, categoryMeta, renderWorkerCard, renderJobCard, renderSkeletonCards, showEmptyState, showToast, initBottomSheet, requestCityFromLocation, showSuccessOverlay } from "./main.js";
+    import { initCommonUI, categoryMeta, getCategoryLabel, renderWorkerCard, renderJobCard, renderSkeletonCards, showEmptyState, showToast, initBottomSheet, requestCityFromLocation, showSuccessOverlay, getText } from "./main.js";
     import { fetchWorkers, fetchJobs, createApplication } from "./appwrite.js";
 
     const resultsNode = document.getElementById("results");
@@ -107,7 +112,7 @@
     function buildCategoryChips() {
       categoryChips.innerHTML = Object.entries(categoryMeta).map(([key, value]) => {
         const activeClass = state.selectedCategory === key ? "active" : "";
-        return `<button class="chip touch-target ${activeClass}" data-chip="${key}"><i class="${value.icon}"></i> ${value.label}</button>`;
+        return `<button class="chip touch-target ${activeClass}" data-chip="${key}"><i class="${value.icon}"></i> ${getCategoryLabel(key)}</button>`;
       }).join("");
     }
 
@@ -132,18 +137,19 @@
       });
     }
 
-    function renderResults() {
+    async function renderResults() {
       renderSkeletonCards(resultsNode, 3);
-      setTimeout(() => {
+      setTimeout(async () => {
         if (state.mode === "workers") {
           const data = filteredWorkers();
-          applyFiltersBtn.textContent = `Show ${data.length} Results`;
+          const showResultsText = await getText("search.showResults", "Show Results");
+          applyFiltersBtn.textContent = `${showResultsText}: ${data.length}`;
           if (!data.length) {
             showEmptyState({
               container: resultsNode,
-              title: "No workers found nearby",
-              message: "Try expanding your search radius",
-              buttonText: "Expand Search",
+              title: await getText("search.noWorkers", "No workers found nearby"),
+              message: await getText("search.tryExpand", "Try expanding your search radius"),
+              buttonText: await getText("search.expandSearch", "Expand Search"),
               onAction: () => {
                 state.distance = Math.min(50, state.distance + 10);
                 document.getElementById("distanceRange").value = String(state.distance);
@@ -155,22 +161,23 @@
           }
           resultsNode.innerHTML = data.map(renderWorkerCard).join("");
         } else {
-          applyFiltersBtn.textContent = `Show ${jobs.length} Results`;
+          const showResultsText = await getText("search.showResults", "Show Results");
+          applyFiltersBtn.textContent = `${showResultsText}: ${jobs.length}`;
           resultsNode.innerHTML = jobs.map(renderJobCard).join("");
           resultsNode.querySelectorAll("[data-job-apply]").forEach((button) => {
             button.addEventListener("click", async () => {
               const jobId = button.getAttribute("data-job-apply");
               const currentUser = await getCurrentUser();
               if (!currentUser) {
-                showToast("Please login to apply", "warning");
+                showToast(await getText("search.loginToApply", "Please login to apply"), "warning");
                 return;
               }
               const result = await createApplication(jobId, currentUser.$id);
               if (result) {
-                showSuccessOverlay("Applied Successfully!");
-                showToast("Application sent to employer", "success");
+                showSuccessOverlay(await getText("search.appliedSuccess", "Applied Successfully!"));
+                showToast(await getText("search.applicationSent", "Application sent to employer"), "success");
               } else {
-                showToast("Failed to apply. Try again.", "error");
+                showToast(await getText("search.applyFailed", "Failed to apply. Try again."), "error");
               }
             });
           });
@@ -188,8 +195,8 @@
         if (!workers.length && !jobs.length) {
           showEmptyState({
             container: resultsNode,
-            title: "No data available yet",
-            message: "Workers and jobs will appear here soon",
+            title: await getText("search.noData", "No data available yet"),
+            message: await getText("search.noDataSub", "Workers and jobs will appear here soon"),
             iconClass: "ph ph-briefcase"
           });
           return;
@@ -200,9 +207,9 @@
         console.error("Failed to load data:", error);
         showEmptyState({
           container: resultsNode,
-          title: "Error loading data",
-          message: "Please check your connection",
-          buttonText: "Retry",
+          title: await getText("search.errorLoad", "Error loading data"),
+          message: await getText("search.connectionCheck", "Please check your connection"),
+          buttonText: await getText("common.retry", "Retry"),
           onAction: loadData
         });
       }
@@ -301,20 +308,25 @@
       if (city) {
         state.city = city;
         locationBanner.remove();
-        showToast(`Searching near ${city}`, "success");
+        showToast(`${await getText("search.searchingNear", "Searching near")} ${city}`, "success");
       } else {
-        showToast("You seem to be offline. Check your connection.", "error");
+        showToast(await getText("search.offlineHint", "You seem to be offline. Check your connection."), "error");
       }
     });
 
     document.getElementById("enterCityBtn").addEventListener("click", () => {
-      const city = prompt("Enter your city");
+      const city = prompt(localStorage.getItem("lang") === "hi" ? "अपना शहर लिखें" : "Enter your city");
       if (!city) {
         return;
       }
       state.city = city;
       locationBanner.remove();
-      showToast(`Searching near ${city}`, "success");
+      showToast(`${localStorage.getItem("lang") === "hi" ? "पास में खोज रहे हैं" : "Searching near"} ${city}`, "success");
+    });
+
+    document.addEventListener("languageChanged", () => {
+      buildCategoryChips();
+      renderResults();
     });
 
     // Initialize

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Employer Reviews</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="stats-grid-3">
+    <article class="stat-card"><div><div class="stat-value" id="avgRating">0.0</div><div class="stat-label">Average Rating</div></div></article>
+    <article class="stat-card"><div><div class="stat-value" id="totalReviews">0</div><div class="stat-label">Total Reviews</div></div></article>
+    <article class="stat-card"><div><div class="stat-value" id="highReviews">0</div><div class="stat-label">4+ Ratings</div></div></article>
+  </section>
+  <section class="data-table-wrapper" style="padding:20px;margin-top:16px"><div id="reviewList" class="page-grid"></div></section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showSkeletons, hideSkeletons, showToast, timeAgo, animateCounter } from "./js/dashboard.js";
+
+async function loadPage() {
+  const shell = await initDashboard("employer", "Employer Reviews");
+  if (!shell) return;
+  const list = document.getElementById("reviewList");
+  showSkeletons(list, 5);
+
+  try {
+    const res = await db.listDocuments(DB_ID, "reviews", [Query.equal("employerId", shell.user.$id), Query.orderDesc("$createdAt"), Query.limit(200)]);
+    const reviews = res.documents;
+    const avg = reviews.length ? reviews.reduce((a,b)=>a+Number(b.rating||0),0)/reviews.length : 0;
+    const high = reviews.filter((r)=>Number(r.rating||0)>=4).length;
+    document.getElementById("avgRating").textContent = avg.toFixed(1);
+    animateCounter(document.getElementById("totalReviews"), reviews.length);
+    animateCounter(document.getElementById("highReviews"), high);
+
+    hideSkeletons(list);
+    if (!reviews.length) {
+      list.innerHTML = `<article class="review-card">No reviews received yet.</article>`;
+      return;
+    }
+
+    list.innerHTML = reviews.map((review) => `
+      <article class="review-card">
+        <div style="display:flex;justify-content:space-between"><strong>${Number(review.rating||0).toFixed(1)}/5</strong><small style="color:var(--text-muted)">${timeAgo(review.$createdAt)}</small></div>
+        <p style="margin-top:8px">${review.comment || "No comment"}</p>
+      </article>
+    `).join("");
+  } catch {
+    hideSkeletons(list);
+    list.innerHTML = `<article class="review-card" style="color:var(--danger)">Unable to load reviews right now.</article>`;
+    showToast("Could not fetch reviews.", "error");
+  }
+}
+
+loadPage();
+</script>
+</body></html>

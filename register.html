@@ -12,330 +12,199 @@
 </head>
 <body>
   <main class="auth-page">
-    <section class="auth-card" style="width:min(720px,100%)">
-      <h1 class="auth-logo"><i class="ph ph-toolbox"></i> KaamConnect</h1>
-      <div class="progress-wrap">
-        <div class="progress-line"><div class="progress-fill" id="progressFill"></div></div>
-        <small id="stepText">Step 1 of 3</small>
+    <section class="auth-card" style="width:min(520px,100%);padding:24px">
+      <div class="card auth-header-card" style="margin-bottom:14px;padding:16px">
+        <h1 class="auth-logo" style="margin-bottom:8px"><i class="ph ph-toolbox"></i> KaamConnect</h1>
+        <h2 class="auth-title" data-i18n="register.step1Title">Create your account</h2>
+        <p class="auth-subtitle">Create your login now. Profile details are completed next.</p>
       </div>
 
-      <button class="btn btn-outline touch-target" id="googleRegisterBtn"><i class="ph ph-globe"></i> Continue with Google</button>
+      <div class="progress-wrap" style="margin-bottom:18px">
+        <div class="progress-line"><div class="progress-fill" style="width:50%"></div></div>
+        <small>Step 1 of 2</small>
+      </div>
 
-      <section id="step1" class="role-cards">
-        <h2 data-i18n="register.step1Title">Who are you?</h2>
-        <button class="role-card touch-target" data-role-card="worker">
-          <div>
-            <div style="font-size:38px"><i class="ph ph-hard-hat"></i></div>
-            <h3>I am a Worker</h3>
-            <p>Electrician, Plumber, Maid...</p>
-          </div>
-        </button>
-        <button class="role-card touch-target" data-role-card="employer">
-          <div>
-            <div style="font-size:38px"><i class="ph ph-buildings"></i></div>
-            <h3>I need to Hire</h3>
-            <p>Find workers for my home/work</p>
-          </div>
-        </button>
-        <button id="step1Next" class="btn btn-primary touch-target">Continue</button>
-      </section>
+      <div class="tab-toggle" id="roleToggle" style="margin-bottom:18px">
+        <button class="active touch-target" data-role="worker"><i class="ph ph-hard-hat"></i> Worker</button>
+        <button class="touch-target" data-role="employer"><i class="ph ph-buildings"></i> Employer</button>
+      </div>
 
-      <section id="step2" style="display:none">
-        <h2 data-i18n="register.step2Title">Tell us about yourself</h2>
-        <div class="dashboard-grid" style="margin-top:12px">
-          <div class="input-group">
-            <label class="input-label">Name</label>
-            <input class="input" id="nameInput" autocomplete="name" placeholder="Your full name">
-            <p class="field-error" id="nameError"></p>
-          </div>
+      <div class="dashboard-grid" style="grid-template-columns:1fr">
+        <div class="input-group">
+          <label class="input-label" for="nameInput">Full Name</label>
+          <input class="input" id="nameInput" autocomplete="name" placeholder="Your full name">
+          <p class="field-error" id="nameError"></p>
+        </div>
 
-          <div class="input-group">
-            <label class="input-label">Email Address</label>
-            <div class="input-row">
-              <span class="input-icon"><i class="ph ph-envelope-simple"></i></span>
-              <input class="input" id="emailInput" autocomplete="email" name="email" inputmode="email" placeholder="name@example.com" style="padding-left:54px">
-            </div>
-            <p class="field-error" id="emailError"></p>
+        <div class="input-group">
+          <label class="input-label" for="emailInput">Email Address</label>
+          <div class="input-row">
+            <span class="input-icon"><i class="ph ph-envelope-simple"></i></span>
+            <input class="input" id="emailInput" autocomplete="email" name="email" inputmode="email" placeholder="name@example.com" style="padding-left:54px">
           </div>
+          <p class="field-error" id="emailError"></p>
+        </div>
 
-          <div class="input-group">
-            <label class="input-label">Password</label>
+        <div class="input-group">
+          <label class="input-label" for="passwordInput">Password</label>
+          <div class="input-row">
+            <span class="input-icon"><i class="ph ph-lock-key"></i></span>
             <input class="input" id="passwordInput" type="password" autocomplete="new-password" name="new-password" placeholder="At least 6 characters">
-            <p class="field-error" id="passwordError"></p>
+            <button type="button" class="input-action" id="showPasswordBtn">Show</button>
           </div>
+          <p class="field-error" id="passwordError"></p>
+        </div>
 
-          <div class="input-group">
-            <label class="input-label">City</label>
-            <input class="input" id="cityInput" placeholder="Your city" autocomplete="address-level2">
-            <p class="field-error" id="cityError"></p>
-            <button id="detectLocationBtn" type="button" class="btn btn-primary touch-target"><i class="ph ph-map-pin"></i> Detect My Location</button>
+        <div class="input-group">
+          <label class="input-label" for="confirmPasswordInput">Verify Password</label>
+          <div class="input-row">
+            <span class="input-icon"><i class="ph ph-lock-key"></i></span>
+            <input class="input" id="confirmPasswordInput" type="password" autocomplete="new-password" placeholder="Repeat your password">
+            <button type="button" class="input-action" id="showConfirmPasswordBtn">Show</button>
           </div>
+          <p class="field-error" id="confirmPasswordError"></p>
+        </div>
+      </div>
 
-          <div id="workerOnlyFields" style="display:none;gap:12px;display:none">
-            <div>
-              <label class="input-label">What is your work?</label>
-              <div class="category-grid" id="workTypeGrid"></div>
-              <p class="field-error" id="workTypeError"></p>
-            </div>
-            <div class="input-group">
-              <label class="input-label">Daily Rate</label>
-              <input type="range" min="200" max="2500" step="50" value="500" id="rateSlider" class="touch-target">
-              <input class="input" id="rateInput" inputmode="numeric" value="500">
-              <small id="ratePreview">₹500 per day</small>
-              <p class="field-error" id="dailyRateError"></p>
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;margin-top:14px">
-          <button class="btn btn-outline touch-target" id="step2Back">Back</button>
-          <button class="btn btn-primary touch-target" id="step2Next">Continue</button>
-        </div>
-      </section>
+      <div class="auth-actions" style="margin-top:16px">
+        <button class="btn btn-primary touch-target" id="createAccountBtn"><i class="ph ph-user-plus"></i> Create Account</button>
+        <button class="btn btn-outline touch-target" id="googleRegisterBtn"><i class="ph ph-globe"></i> Continue with Google</button>
+      </div>
 
-      <section id="step3" style="display:none">
-        <h2 data-i18n="register.step3Title">Add Your Photo (Optional)</h2>
-        <div class="photo-upload">
-          <div>
-            <div style="font-size:36px"><i class="ph ph-camera"></i></div>
-            <p>Tap to take photo or choose from gallery</p>
-            <img id="photoPreview" class="preview-photo" style="display:none;margin:10px auto 0" alt="Preview">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
-          <label class="btn btn-outline touch-target" for="cameraInput"><i class="ph ph-camera"></i> Take Photo</label>
-          <label class="btn btn-outline touch-target" for="galleryInput"><i class="ph ph-image"></i> Gallery</label>
-        </div>
-        <input id="cameraInput" type="file" accept="image/*" capture="user" style="display:none">
-        <input id="galleryInput" type="file" accept="image/*" style="display:none">
-
-        <div style="display:flex;gap:10px;margin-top:14px">
-          <button class="btn btn-outline touch-target" id="step3Back">Back</button>
-          <button class="btn btn-muted touch-target" id="skipBtn">Skip for now</button>
-          <button class="btn btn-primary touch-target" id="createAccountBtn">Create Account</button>
-        </div>
-      </section>
+      <div class="auth-meta" style="margin-top:6px">
+        <p>Already have an account?</p>
+        <a href="login.html" style="font-weight:700;color:var(--secondary)">Login →</a>
+      </div>
     </section>
   </main>
 
   <script type="module">
-    import { initCommonUI, categoryMeta, requestCityFromLocation, showToast, showLoading, hideLoading, showSuccessOverlay, formatCurrency } from "./main.js";
+    import { initCommonUI, showToast, showLoading, hideLoading, showSuccessOverlay } from "./main.js";
     import { registerUser, loginWithGoogle } from "./auth.js";
 
-    const steps = [document.getElementById("step1"), document.getElementById("step2"), document.getElementById("step3")];
-    const progressFill = document.getElementById("progressFill");
-    const stepText = document.getElementById("stepText");
-    const workerOnlyFields = document.getElementById("workerOnlyFields");
-    const workTypeGrid = document.getElementById("workTypeGrid");
+    const roleToggle = document.getElementById("roleToggle");
+    const nameInput = document.getElementById("nameInput");
+    const emailInput = document.getElementById("emailInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const confirmPasswordInput = document.getElementById("confirmPasswordInput");
+    const createAccountBtn = document.getElementById("createAccountBtn");
+    const nameError = document.getElementById("nameError");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
+    const confirmPasswordError = document.getElementById("confirmPasswordError");
+    const showPasswordBtn = document.getElementById("showPasswordBtn");
+    const showConfirmPasswordBtn = document.getElementById("showConfirmPasswordBtn");
     const googleRegisterBtn = document.getElementById("googleRegisterBtn");
-    let currentStep = 1;
-    let selectedRole = "";
-    let selectedWorkType = "";
-    let selectedPhotoFile = null;
 
-    function goToStep(step) {
-      currentStep = step;
-      steps.forEach((node, index) => {
-        node.style.display = index + 1 === step ? "block" : "none";
-      });
-      progressFill.style.width = `${step * 33.333}%`;
-      stepText.textContent = `Step ${step} of 3`;
-    }
+    let selectedRole = "worker";
 
-    function setError(id, message) {
-      const node = document.getElementById(id);
+    function setError(node, message) {
       node.textContent = message || "";
       node.classList.toggle("visible", Boolean(message));
     }
 
     function clearErrors() {
-      ["nameError", "emailError", "passwordError", "cityError", "workTypeError", "dailyRateError"].forEach((id) => setError(id, ""));
+      [nameError, emailError, passwordError, confirmPasswordError].forEach((node) => setError(node, ""));
     }
 
-    document.querySelectorAll("[data-role-card]").forEach((card) => {
-      card.addEventListener("click", () => {
-        document.querySelectorAll("[data-role-card]").forEach((node) => node.classList.remove("active"));
-        card.classList.add("active");
-        selectedRole = card.dataset.roleCard;
-      });
-    });
-
-    document.getElementById("step1Next").addEventListener("click", () => {
-      if (!selectedRole) {
-        showToast("Please choose who you are", "warning");
-        return;
-      }
-      workerOnlyFields.style.display = selectedRole === "worker" ? "grid" : "none";
-      goToStep(2);
-    });
-
-    document.getElementById("step2Back").addEventListener("click", () => goToStep(1));
-    document.getElementById("step3Back").addEventListener("click", () => goToStep(2));
-
-    Object.entries(categoryMeta).forEach(([key, value]) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "category-card touch-target";
-      button.style.background = value.color;
-      button.innerHTML = `<span class="emoji"><i class="${value.icon}"></i></span><span>${value.label}</span>`;
-      button.addEventListener("click", () => {
-        selectedWorkType = key;
-        [...workTypeGrid.children].forEach((node) => node.style.borderColor = "transparent");
-        button.style.borderColor = "var(--primary)";
-      });
-      workTypeGrid.appendChild(button);
-    });
-
-    const rateSlider = document.getElementById("rateSlider");
-    const rateInput = document.getElementById("rateInput");
-    const ratePreview = document.getElementById("ratePreview");
-
-    function syncRate(value) {
-      const numeric = Number(value || 0);
-      rateSlider.value = String(numeric);
-      rateInput.value = String(numeric);
-      ratePreview.textContent = `${formatCurrency(numeric)} per day`;
+    function syncGoogleRedirect() {
+      localStorage.setItem("signupRole", selectedRole);
     }
 
-    rateSlider.addEventListener("input", () => syncRate(rateSlider.value));
-    rateInput.addEventListener("input", () => syncRate(rateInput.value.replace(/\D/g, "")));
-
-    document.getElementById("detectLocationBtn").addEventListener("click", async () => {
-      const city = await requestCityFromLocation();
-      if (!city) {
-        showToast("Could not detect location. Please type your city.", "warning");
-        return;
-      }
-      document.getElementById("cityInput").value = city;
-      showToast(`Detected: ${city}`, "success");
+    roleToggle.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-role]");
+      if (!button) return;
+      roleToggle.querySelectorAll("button").forEach((node) => node.classList.remove("active"));
+      button.classList.add("active");
+      selectedRole = button.dataset.role;
+      syncGoogleRedirect();
     });
 
-    document.getElementById("step2Next").addEventListener("click", () => {
+    showPasswordBtn.addEventListener("click", () => {
+      const visible = passwordInput.type === "text";
+      passwordInput.type = visible ? "password" : "text";
+      showPasswordBtn.textContent = visible ? "Show" : "Hide";
+    });
+
+    showConfirmPasswordBtn.addEventListener("click", () => {
+      const visible = confirmPasswordInput.type === "text";
+      confirmPasswordInput.type = visible ? "password" : "text";
+      showConfirmPasswordBtn.textContent = visible ? "Show" : "Hide";
+    });
+
+    createAccountBtn.addEventListener("click", async () => {
       clearErrors();
-      const name = document.getElementById("nameInput").value.trim();
-      const email = document.getElementById("emailInput").value.trim();
-      const password = document.getElementById("passwordInput").value;
-      const city = document.getElementById("cityInput").value.trim();
-      const rate = Number(rateInput.value || 0);
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
 
       let hasError = false;
       if (name.length < 2) {
-        setError("nameError", "Please enter your full name");
+        setError(nameError, "Please enter your full name");
         hasError = true;
       }
       if (!/^\S+@\S+\.\S+$/.test(email)) {
-        setError("emailError", "Please enter a valid email address");
+        setError(emailError, "Please enter a valid email address");
         hasError = true;
       }
       if (password.length < 6) {
-        setError("passwordError", "Password should be at least 6 characters");
+        setError(passwordError, "Password should be at least 6 characters");
         hasError = true;
       }
-      if (city.length < 2) {
-        setError("cityError", "Please enter your city");
+      if (confirmPassword !== password) {
+        setError(confirmPasswordError, "Passwords do not match");
+        hasError = true;
+      }
+      if (!selectedRole) {
+        showToast("Please choose who you are", "warning");
         hasError = true;
       }
 
-      if (selectedRole === "worker") {
-        if (!selectedWorkType) {
-          setError("workTypeError", "Please choose your work type");
-          hasError = true;
-        }
-        if (!rate || rate < 100) {
-          setError("dailyRateError", "Please choose your daily rate");
-          hasError = true;
-        }
-      }
-
-      if (!hasError) {
-        goToStep(3);
-      }
-    });
-
-    function handlePhotoInput(input) {
-      input.addEventListener("change", () => {
-        const file = input.files?.[0];
-        if (!file) {
-          return;
-        }
-        selectedPhotoFile = file;
-        const reader = new FileReader();
-        reader.onload = () => {
-          const preview = document.getElementById("photoPreview");
-          preview.src = reader.result;
-          preview.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    handlePhotoInput(document.getElementById("cameraInput"));
-    handlePhotoInput(document.getElementById("galleryInput"));
-
-    document.getElementById("skipBtn").addEventListener("click", () => {
-      selectedPhotoFile = null;
-      document.getElementById("createAccountBtn").click();
-    });
-
-    document.getElementById("createAccountBtn").addEventListener("click", async () => {
-      const payload = {
-        role: selectedRole,
-        name: document.getElementById("nameInput").value.trim(),
-        email: document.getElementById("emailInput").value.trim(),
-        password: document.getElementById("passwordInput").value,
-        city: document.getElementById("cityInput").value.trim(),
-        workType: selectedWorkType,
-        dailyRate: Number(rateInput.value || 0),
-        photoFile: selectedPhotoFile
-      };
+      if (hasError) return;
 
       showLoading("Creating your account...");
-      const result = await registerUser(payload);
+      const result = await registerUser({
+        role: selectedRole,
+        name,
+        email,
+        password
+      });
       hideLoading();
 
       if (!result.ok) {
-        clearErrors();
-        Object.entries(result.errors || {}).forEach(([key, message]) => {
-          const idMap = {
-            name: "nameError",
-            email: "emailError",
-            password: "passwordError",
-            city: "cityError",
-            workType: "workTypeError",
-            dailyRate: "dailyRateError"
-          };
-          if (idMap[key]) {
-            setError(idMap[key], message);
-          }
-        });
-
-        googleRegisterBtn.addEventListener("click", async () => {
-          try {
-            const target = selectedRole === "worker" ? "worker-dashboard.html" : "employer-dashboard.html";
-            const successUrl = new URL(target, window.location.href).toString();
-            const failureUrl = new URL("register.html", window.location.href).toString();
-            await loginWithGoogle(successUrl, failureUrl);
-          } catch {
-            showToast("Google sign-in could not start. Please try again.", "error");
-          }
-        });
+        setError(emailError, result.errors?.email || "");
+        setError(passwordError, result.errors?.password || "");
         showToast("Please fix highlighted details.", "warning");
-        if (currentStep !== 2) {
-          goToStep(2);
-        }
         return;
       }
 
+      localStorage.setItem("signupRole", selectedRole);
       showSuccessOverlay("Account Created!");
       setTimeout(() => {
-        window.location.href = selectedRole === "worker" ? "worker-dashboard.html" : "employer-dashboard.html";
-      }, 1200);
+        window.location.href = `quick-setup.html?role=${encodeURIComponent(selectedRole)}`;
+      }, 1100);
+    });
+
+    googleRegisterBtn.addEventListener("click", async () => {
+      try {
+        syncGoogleRedirect();
+        const target = `quick-setup.html?role=${encodeURIComponent(selectedRole)}`;
+        const successUrl = new URL(target, window.location.href).toString();
+        const failureUrl = new URL("register.html", window.location.href).toString();
+        await loginWithGoogle(successUrl, failureUrl);
+      } catch {
+        showToast("Google sign-in could not start. Please try again.", "error");
+      }
     });
 
     const params = new URLSearchParams(window.location.search);
     const roleParam = params.get("role");
     if (roleParam && ["worker", "employer"].includes(roleParam)) {
-      const roleCard = document.querySelector(`[data-role-card="${roleParam}"]`);
+      const roleCard = document.querySelector(`[data-role="${roleParam}"]`);
       roleCard?.click();
+    } else {
+      syncGoogleRedirect();
     }
 
     initCommonUI();

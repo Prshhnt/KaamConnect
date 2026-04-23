@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KaamConnect | Worker Public Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" /><link rel="stylesheet" href="./css/dashboard.css" />
+<script src="https://unpkg.com/phosphor-icons" defer></script></head>
+<body class="dashboard-shell"><a href="#mainContent" class="skip-link">Skip to content</a>
+<div id="sidebarMount"></div><div id="overlayMount"></div><div id="topbarMount"></div>
+<main id="mainContent" class="dashboard-main" tabindex="-1">
+  <section class="data-table-wrapper" style="padding:20px" id="profileCard"></section>
+  <section class="data-table-wrapper" style="padding:20px;margin-top:16px">
+    <h2 class="section-title">Recent Reviews</h2>
+    <div id="reviewsWrap" class="page-grid" style="margin-top:12px"></div>
+  </section>
+</main>
+<script type="module">
+import { db, DB_ID } from "./js/appwrite.js";
+import { Query, ID } from "./js/appwrite.js";
+import { initDashboard, showSkeletons, hideSkeletons, showToast, timeAgo } from "./js/dashboard.js";
+
+async function loadPage() {
+  const shell = await initDashboard("worker", "Public Profile Preview");
+  if (!shell) return;
+
+  const profileCard = document.getElementById("profileCard");
+  const reviewsWrap = document.getElementById("reviewsWrap");
+  showSkeletons(profileCard, 1);
+  showSkeletons(reviewsWrap, 3);
+
+  try {
+    const workerId = shell.user.$id;
+    const reviewsRes = await db.listDocuments(DB_ID, "reviews", [Query.equal("workerId", workerId), Query.orderDesc("$createdAt"), Query.limit(20)]);
+    const p = shell.profile || {};
+
+    hideSkeletons(profileCard);
+    profileCard.innerHTML = `
+      <h1 class="section-title" style="font-size:24px">${p.name || "Unnamed Worker"}</h1>
+      <p style="color:var(--text-muted);margin:8px 0">${p.city || "City not set"} • ${p.category || "Category not set"}</p>
+      <p style="margin:10px 0">${p.about || p.bio || "No bio available yet."}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        ${(Array.isArray(p.skills) ? p.skills : String(p.skills || "").split(",").map((s) => s.trim()).filter(Boolean)).map((skill) => `<span class="badge badge-info">${skill}</span>`).join("") || "<span class='badge badge-neutral'>No skills listed</span>"}
+      </div>
+    `;
+
+    hideSkeletons(reviewsWrap);
+    const reviews = reviewsRes.documents;
+    if (!reviews.length) {
+      reviewsWrap.innerHTML = `<article class="review-card">No reviews yet.</article>`;
+      return;
+    }
+
+    reviewsWrap.innerHTML = reviews.map((review) => `
+      <article class="review-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Rating: ${Number(review.rating || 0).toFixed(1)}/5</strong>
+          <small style="color:var(--text-muted)">${timeAgo(review.$createdAt)}</small>
+        </div>
+        <p style="margin-top:8px">${review.comment || "No comment"}</p>
+      </article>
+    `).join("");
+  } catch {
+    hideSkeletons(profileCard);
+    hideSkeletons(reviewsWrap);
+    profileCard.innerHTML = `<p style="color:var(--danger)">Could not load public profile details.</p>`;
+    reviewsWrap.innerHTML = "";
+    showToast("Unable to load public profile.", "error");
+  }
+}
+
+loadPage();
+</script>
+</body></html>

@@ -12,9 +12,12 @@
 </head>
 <body>
   <main class="auth-page">
-    <section class="auth-card">
-      <h1 class="auth-logo"><i class="ph ph-toolbox"></i> KaamConnect</h1>
-      <h2 class="auth-title" data-i18n="login.title">Welcome Back</h2>
+    <section class="auth-card" style="width:min(520px,100%);padding:24px">
+      <div class="card auth-header-card" style="padding:16px">
+        <h1 class="auth-logo"><i class="ph ph-toolbox"></i> KaamConnect</h1>
+        <h2 class="auth-title" data-i18n="login.title">Welcome Back</h2>
+        <p class="auth-subtitle">Sign in to continue to your dashboard.</p>
+      </div>
 
       <div class="tab-toggle" id="roleToggle">
         <button class="active touch-target" data-role="worker"><i class="ph ph-hard-hat"></i> Worker</button>
@@ -40,9 +43,14 @@
         <p class="field-error" id="passwordError"></p>
       </div>
 
-      <button class="btn btn-primary touch-target" id="loginBtn"><i class="ph ph-sign-in"></i> <span data-i18n="login.button">Login</span></button>
-      <button class="btn btn-outline touch-target" id="googleLoginBtn"><i class="ph ph-globe"></i> Continue with Google</button>
-      <a href="register.html" style="text-align:center;font-weight:600;color:var(--secondary)">Don't have an account? Register →</a>
+      <div class="auth-actions">
+        <button class="btn btn-primary touch-target" id="loginBtn"><i class="ph ph-sign-in"></i> <span data-i18n="login.button">Login</span></button>
+        <button class="btn btn-outline touch-target" id="googleLoginBtn"><i class="ph ph-globe"></i> Continue with Google</button>
+      </div>
+
+      <div class="auth-meta" style="justify-content:center">
+        <a href="register.html" style="font-weight:700;color:var(--secondary)">Don't have an account? Register →</a>
+      </div>
     </section>
   </main>
 
