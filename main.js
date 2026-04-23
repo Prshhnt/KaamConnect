@@ -1,4 +1,4 @@
-import { applyTranslations, setupLanguageSwitcher, maybeShowLanguageHint, getCurrentLanguage, loadLocale } from "./i18n.js";
+import { maybeShowLanguageHint, getCurrentLanguage, loadLocale } from "./i18n.js";
 
 const categoryMeta = {
   electrician: { icon: "ph ph-flashlight", label: "Electrician", color: "#FEF3C7", accent: "#CA8A04" },
@@ -383,6 +383,88 @@ function setupConnectionHint() {
   }
 }
 
+function initGoogleTranslate() {
+  const switchers = [...document.querySelectorAll("[data-language-switcher]")];
+  if (!switchers.length) {
+    return;
+  }
+
+  const stateKey = "google_translate_lang";
+  let currentTranslateLang = localStorage.getItem(stateKey) || "en";
+
+  function updateLangLabels() {
+    const text = currentTranslateLang === "hi" ? "हिंदी" : "English";
+    document.querySelectorAll("[data-lang-label]").forEach((node) => {
+      node.textContent = text;
+    });
+  }
+
+  function applyLanguage(lang) {
+    const combo = document.querySelector(".goog-te-combo");
+    if (!combo) {
+      showToast("Translator is loading. Please try again.", "warning");
+      return;
+    }
+
+    if (lang === "hi") {
+      combo.value = "hi";
+      combo.dispatchEvent(new Event("change"));
+      currentTranslateLang = "hi";
+      localStorage.setItem(stateKey, "hi");
+      updateLangLabels();
+      return;
+    }
+
+    const hasEnglishOption = Array.from(combo.options).some((option) => option.value === "en");
+    if (hasEnglishOption) {
+      combo.value = "en";
+    } else {
+      combo.selectedIndex = 0;
+    }
+    combo.dispatchEvent(new Event("change"));
+    currentTranslateLang = "en";
+    localStorage.setItem(stateKey, "en");
+    updateLangLabels();
+  }
+
+  let shell = document.getElementById("google_translate_element");
+  if (!shell) {
+    shell = document.createElement("div");
+    shell.id = "google_translate_element";
+    shell.style.display = "none";
+    document.body.appendChild(shell);
+  }
+
+  updateLangLabels();
+  switchers.forEach((button) => button.addEventListener("click", () => {
+    applyLanguage(currentTranslateLang === "hi" ? "en" : "hi");
+  }));
+
+  if (window.google?.translate?.TranslateElement || document.querySelector('script[src*="translate.google.com/translate_a/element.js"]')) {
+    return;
+  }
+
+  window.googleTranslateElementInit = () => {
+    new window.google.translate.TranslateElement(
+      {
+        pageLanguage: "en",
+        autoDisplay: false,
+        includedLanguages: "en,hi"
+      },
+      "google_translate_element"
+    );
+
+    if (currentTranslateLang === "hi") {
+      window.setTimeout(() => applyLanguage("hi"), 120);
+    }
+  };
+
+  const script = document.createElement("script");
+  script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+  script.async = true;
+  document.head.appendChild(script);
+}
+
 function showSuccessOverlay(message = "Success!") {
   const overlay = document.createElement("div");
   overlay.className = "success-overlay";
@@ -428,13 +510,12 @@ function initBottomSheet(triggerSelector, sheetSelector, closeSelector) {
 }
 
 async function initCommonUI() {
-  setupLanguageSwitcher();
+  initGoogleTranslate();
   maybeShowLanguageHint();
   setupMobileMenu();
   setupSearchExpand();
   setupConnectionHint();
   initAnimatedCounters();
-  await applyTranslations();
 }
 
 export {

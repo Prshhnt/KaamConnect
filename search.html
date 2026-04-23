@@ -28,6 +28,38 @@
       <button class="touch-target" data-mode="jobs"><span data-i18n="search.findJobs">Find Jobs</span></button>
     </div>
 
+    <section class="card" style="margin-top:12px">
+      <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:10px;align-items:end">
+        <div class="input-group" style="gap:6px">
+          <label class="input-label">City</label>
+          <input class="input" id="quickCityInput" placeholder="e.g. Saket">
+        </div>
+        <div class="input-group" style="gap:6px">
+          <label class="input-label">Category</label>
+          <select class="input" id="quickCategoryInput">
+            <option value="">All categories</option>
+          </select>
+        </div>
+        <div class="input-group" style="gap:6px">
+          <label class="input-label">Min Rating</label>
+          <select class="input" id="quickRatingInput">
+            <option value="0">Any</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+            <option value="4.5">4.5+</option>
+          </select>
+        </div>
+        <div class="input-group" style="gap:6px">
+          <label class="input-label">Availability</label>
+          <select class="input" id="quickAvailabilityInput">
+            <option value="all">All</option>
+            <option value="available">Available only</option>
+          </select>
+        </div>
+        <button class="btn btn-primary touch-target" id="quickApplyBtn">Apply</button>
+      </div>
+    </section>
+
     <section class="card" id="locationBanner" style="margin-top:12px;background:var(--warning-light)">
       <h3><i class="ph ph-map-pin"></i> <span data-i18n="search.locationBanner">Allow location for better results nearby</span></h3>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
@@ -94,16 +126,23 @@
     const locationBanner = document.getElementById("locationBanner");
     const categoryChips = document.getElementById("categoryChips");
     const applyFiltersBtn = document.getElementById("applyFiltersBtn");
+    const quickCityInput = document.getElementById("quickCityInput");
+    const quickCategoryInput = document.getElementById("quickCategoryInput");
+    const quickRatingInput = document.getElementById("quickRatingInput");
+    const quickAvailabilityInput = document.getElementById("quickAvailabilityInput");
+
+    const params = new URLSearchParams(location.search);
+    const paramMode = params.get("mode");
 
     const state = {
-      mode: "workers",
-      selectedCategory: new URLSearchParams(location.search).get("category") || "",
-      distance: 10,
-      rateMin: 200,
-      rateMax: 2000,
-      availableOnly: true,
-      minRating: 4,
-      city: new URLSearchParams(location.search).get("city") || ""
+      mode: paramMode === "jobs" ? "jobs" : "workers",
+      selectedCategory: params.get("category") || "",
+      distance: Number(params.get("distance") || 10),
+      rateMin: Number(params.get("rateMin") || 200),
+      rateMax: Number(params.get("rateMax") || 2000),
+      availableOnly: params.get("available") === "0" ? false : true,
+      minRating: Number(params.get("minRating") || 4),
+      city: params.get("city") || ""
     };
 
     let workers = [];
@@ -114,6 +153,26 @@
         const activeClass = state.selectedCategory === key ? "active" : "";
         return `<button class="chip touch-target ${activeClass}" data-chip="${key}"><i class="${value.icon}"></i> ${getCategoryLabel(key)}</button>`;
       }).join("");
+
+      quickCategoryInput.innerHTML = `<option value="">All categories</option>${Object.entries(categoryMeta)
+        .map(([key, value]) => `<option value="${key}">${getCategoryLabel(key) || value.label}</option>`)
+        .join("")}`;
+      quickCategoryInput.value = state.selectedCategory;
+    }
+
+    function syncUrl() {
+      const url = new URL(window.location.href);
+      url.searchParams.set("mode", state.mode);
+      if (state.city) url.searchParams.set("city", state.city);
+      else url.searchParams.delete("city");
+      if (state.selectedCategory) url.searchParams.set("category", state.selectedCategory);
+      else url.searchParams.delete("category");
+      url.searchParams.set("distance", String(state.distance));
+      url.searchParams.set("rateMin", String(state.rateMin));
+      url.searchParams.set("rateMax", String(state.rateMax));
+      url.searchParams.set("minRating", String(state.minRating));
+      url.searchParams.set("available", state.availableOnly ? "1" : "0");
+      window.history.replaceState({}, "", url.toString());
     }
 
     function filteredWorkers() {
@@ -242,12 +301,14 @@
       document.querySelectorAll("#modeToggle button").forEach((node) => node.classList.remove("active"));
       button.classList.add("active");
       state.mode = button.dataset.mode;
+      syncUrl();
       renderResults();
     });
 
     document.getElementById("distanceRange").addEventListener("input", (event) => {
       state.distance = Number(event.target.value);
       document.getElementById("distanceValue").textContent = event.target.value;
+      syncUrl();
       renderResults();
     });
 
@@ -259,6 +320,7 @@
       }
       document.getElementById("rateMin").textContent = String(state.rateMin);
       document.getElementById("rateMax").textContent = String(state.rateMax);
+      syncUrl();
       renderResults();
     });
 
@@ -270,18 +332,36 @@
       }
       document.getElementById("rateMin").textContent = String(state.rateMin);
       document.getElementById("rateMax").textContent = String(state.rateMax);
+      syncUrl();
       renderResults();
     });
 
     document.getElementById("availableToggle").addEventListener("click", (event) => {
       state.availableOnly = !state.availableOnly;
       event.currentTarget.classList.toggle("active", state.availableOnly);
+      quickAvailabilityInput.value = state.availableOnly ? "available" : "all";
+      syncUrl();
       renderResults();
     });
 
     document.getElementById("ratingInput").addEventListener("change", (event) => {
       state.minRating = Number(event.target.value);
+      quickRatingInput.value = String(state.minRating);
+      syncUrl();
       renderResults();
+    });
+
+    document.getElementById("quickApplyBtn").addEventListener("click", async () => {
+      state.city = quickCityInput.value.trim();
+      state.selectedCategory = quickCategoryInput.value;
+      state.minRating = Number(quickRatingInput.value || 0);
+      state.availableOnly = quickAvailabilityInput.value === "available";
+
+      document.getElementById("ratingInput").value = String(state.minRating);
+      document.getElementById("availableToggle").classList.toggle("active", state.availableOnly);
+      buildCategoryChips();
+      syncUrl();
+      await loadData();
     });
 
     document.getElementById("clearFiltersBtn").addEventListener("click", () => {
@@ -291,6 +371,7 @@
       state.rateMax = 2000;
       state.availableOnly = true;
       state.minRating = 4;
+      state.city = "";
       document.getElementById("distanceRange").value = "10";
       document.getElementById("rateMinInput").value = "200";
       document.getElementById("rateMaxInput").value = "2000";
@@ -299,7 +380,13 @@
       document.getElementById("distanceValue").textContent = "10";
       document.getElementById("rateMin").textContent = "200";
       document.getElementById("rateMax").textContent = "2000";
+      quickCityInput.value = "";
+      quickCategoryInput.value = "";
+      quickRatingInput.value = "4";
+      quickAvailabilityInput.value = "available";
       buildCategoryChips();
+      syncUrl();
+      loadData();
       renderResults();
     });
 
@@ -309,6 +396,9 @@
         state.city = city;
         locationBanner.remove();
         showToast(`${await getText("search.searchingNear", "Searching near")} ${city}`, "success");
+        quickCityInput.value = city;
+        syncUrl();
+        await loadData();
       } else {
         showToast(await getText("search.offlineHint", "You seem to be offline. Check your connection."), "error");
       }
@@ -322,6 +412,9 @@
       state.city = city;
       locationBanner.remove();
       showToast(`${localStorage.getItem("lang") === "hi" ? "पास में खोज रहे हैं" : "Searching near"} ${city}`, "success");
+      quickCityInput.value = city;
+      syncUrl();
+      loadData();
     });
 
     document.addEventListener("languageChanged", () => {
@@ -330,7 +423,23 @@
     });
 
     // Initialize
+    if (state.mode === "jobs") {
+      document.querySelectorAll("#modeToggle button").forEach((node) => node.classList.remove("active"));
+      document.querySelector('#modeToggle button[data-mode="jobs"]')?.classList.add("active");
+    }
+    quickCityInput.value = state.city;
+    quickRatingInput.value = String(state.minRating);
+    quickAvailabilityInput.value = state.availableOnly ? "available" : "all";
+    document.getElementById("distanceRange").value = String(state.distance);
+    document.getElementById("distanceValue").textContent = String(state.distance);
+    document.getElementById("rateMinInput").value = String(state.rateMin);
+    document.getElementById("rateMaxInput").value = String(state.rateMax);
+    document.getElementById("rateMin").textContent = String(state.rateMin);
+    document.getElementById("rateMax").textContent = String(state.rateMax);
+    document.getElementById("ratingInput").value = String(state.minRating);
+    document.getElementById("availableToggle").classList.toggle("active", state.availableOnly);
     buildCategoryChips();
+    syncUrl();
     loadData();
     initBottomSheet("#filterBtn", "#filterSheet", "#closeFilterBtn");
     initCommonUI();
