@@ -52,7 +52,6 @@ const setupData = {
       experience: 8,
       available: true,
       reviewsCount: 47,
-      photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=60",
       languages: "Hindi, English",
       skills: "Home Wiring, AC Repair, Switchboard, Solar Panel, Ceiling Fan",
       about: "Expert in home wiring, AC repair, switchboard fitting. Reliable and on time."
@@ -67,7 +66,6 @@ const setupData = {
       experience: 6,
       available: true,
       reviewsCount: 34,
-      photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=60",
       languages: "Hindi",
       skills: "Cleaning, Laundry, Cooking, Organizing",
       about: "Dedicated home helper with 6 years experience"
@@ -82,7 +80,6 @@ const setupData = {
       experience: 9,
       available: false,
       reviewsCount: 19,
-      photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=60",
       languages: "Hindi, English",
       skills: "Pipe Fitting, Leak Repair, Installation",
       about: "Professional plumber with 9 years experience"
@@ -97,7 +94,6 @@ const setupData = {
       experience: 10,
       available: true,
       reviewsCount: 26,
-      photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=60",
       languages: "Hindi, English, Punjabi",
       skills: "Furniture, Wooden Doors, Shelves, Repairs",
       about: "Expert carpentry work with custom designs"
@@ -112,7 +108,6 @@ const setupData = {
       experience: 5,
       available: true,
       reviewsCount: 22,
-      photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&q=60",
       languages: "Hindi, English",
       skills: "Interior Painting, Exterior Painting, Wall Finishing",
       about: "Professional painter with attention to detail"
@@ -127,7 +122,6 @@ const setupData = {
       experience: 12,
       available: true,
       reviewsCount: 55,
-      photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=60",
       languages: "Hindi, English, Punjabi",
       skills: "Car Repair, Maintenance, Diagnostic",
       about: "Trusted mechanic with 12 years experience"
@@ -213,7 +207,6 @@ const setupData = {
     {
       workerId: "temp_worker_1",
       employerId: "demo_employer_1",
-      rating: 5,
       comment: "Excellent work! Very professional and on time.",
       jobId: "temp_job_1",
       createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
@@ -221,7 +214,6 @@ const setupData = {
     {
       workerId: "temp_worker_1",
       employerId: "demo_employer_2",
-      rating: 5,
       comment: "Great service, highly recommend!",
       jobId: "temp_job_2",
       createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -229,7 +221,6 @@ const setupData = {
     {
       workerId: "temp_worker_2",
       employerId: "demo_employer_3",
-      rating: 5,
       comment: "Very clean and organized work.",
       jobId: "temp_job_3",
       createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
